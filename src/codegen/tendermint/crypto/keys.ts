@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { BinaryReader, BinaryWriter } from "../../binary";
 import { DeepPartial, bytesFromBase64, base64FromBytes } from "../../helpers";
 /** PublicKey defines the keys available for use with Validators */

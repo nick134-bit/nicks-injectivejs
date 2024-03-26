@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { MsgUpdateParams } from "./tx";
 export const AminoConverter = {
   "/cosmos.consensus.v1.MsgUpdateParams": {

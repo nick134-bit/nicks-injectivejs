@@ -1,4 +1,3 @@
-//@ts-nocheck
 import * as _136 from "./abci/types";
 import * as _137 from "./blocksync/types";
 import * as _138 from "./consensus/types";

@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { BinaryReader, BinaryWriter } from "../../../../binary";
 import { DeepPartial } from "../../../../helpers";
 /** Config is the config object of the x/auth/tx package. */

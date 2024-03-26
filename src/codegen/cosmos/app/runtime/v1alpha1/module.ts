@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { BinaryReader, BinaryWriter } from "../../../../binary";
 import { DeepPartial } from "../../../../helpers";
 /** Module is the config object for the runtime module. */

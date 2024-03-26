@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { BinaryReader, BinaryWriter } from "../../../binary";
 import { Decimal } from "@cosmjs/math";
 import { DeepPartial } from "../../../helpers";

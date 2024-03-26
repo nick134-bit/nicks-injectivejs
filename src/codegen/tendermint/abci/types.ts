@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { Timestamp } from "../../google/protobuf/timestamp";
 import { ConsensusParams, ConsensusParamsAmino, ConsensusParamsSDKType } from "../types/params";
 import { Header, HeaderAmino, HeaderSDKType } from "../types/types";

@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { PublicKey, PublicKeyAmino, PublicKeySDKType } from "../crypto/keys";
 import { Vote, VoteAmino, VoteSDKType, Proposal, ProposalAmino, ProposalSDKType } from "../types/types";
 import { BinaryReader, BinaryWriter } from "../../binary";

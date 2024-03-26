@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { SignedMsgType } from "./types";
 import { Timestamp } from "../../google/protobuf/timestamp";
 import { BinaryReader, BinaryWriter } from "../../binary";

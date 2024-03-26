@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { Message, MessageAmino, MessageSDKType } from "./types";
 import { Duration, DurationAmino, DurationSDKType } from "../../google/protobuf/duration";
 import { EventDataRoundState, EventDataRoundStateAmino, EventDataRoundStateSDKType } from "../types/events";

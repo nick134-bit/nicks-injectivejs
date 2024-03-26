@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { Block, BlockAmino, BlockSDKType } from "../types/block";
 import { BinaryReader, BinaryWriter } from "../../binary";
 import { DeepPartial } from "../../helpers";

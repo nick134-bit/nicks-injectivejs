@@ -9,8 +9,7 @@
 ## install
 
 ```sh
-clone https://github.com/nick134-bit/nicks-injectivejs.git
-copy src/codegen to your repo 
+npm install nicks-injectivejs
 ```
 ## Table of contents
 

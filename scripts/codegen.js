@@ -17,7 +17,7 @@ telescope({
     classesUseArrowFunctions: true,
 
     tsDisable: {
-      patterns: ['**/tx.registry.ts','k8s.io/**','tendermint/**','cosmos/**'],
+      patterns: ['**/tx.registry.ts'],
       files: [
         'cosmos/auth/v1beta1/query.ts',
         'cosmos/authz/v1beta1/authz.ts',
@@ -95,7 +95,7 @@ telescope({
     },
     rpcClients: {
       type: 'tendermint',
-      enabled: true,
+      enabled: false,
       camelCase: true,
       useConnectComet: true
     },

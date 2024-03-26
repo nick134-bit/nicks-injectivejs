@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { Coin, CoinAmino, CoinSDKType } from "../../base/v1beta1/coin";
 import { Params, ParamsAmino, ParamsSDKType } from "./distribution";
 import { BinaryReader, BinaryWriter } from "../../../binary";

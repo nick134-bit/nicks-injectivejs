@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { PartSetHeader, PartSetHeaderAmino, PartSetHeaderSDKType, Part, PartAmino, PartSDKType, SignedMsgType, BlockID, BlockIDAmino, BlockIDSDKType } from "../types/types";
 import { Proposal as Proposal1 } from "../types/types";
 import { ProposalAmino as Proposal1Amino } from "../types/types";

@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { ParamChange, ParamChangeAmino, ParamChangeSDKType } from "./params";
 import { BinaryReader, BinaryWriter } from "../../../binary";
 import { DeepPartial } from "../../../helpers";

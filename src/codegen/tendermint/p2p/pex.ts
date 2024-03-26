@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { NetAddress, NetAddressAmino, NetAddressSDKType } from "./types";
 import { BinaryReader, BinaryWriter } from "../../binary";
 import { DeepPartial } from "../../helpers";

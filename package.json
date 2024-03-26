@@ -1,6 +1,6 @@
 {
   "name": "@nick134-bit/nicks-injectivejs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "create proto and amino messages for injective",
   "author": "nick134-bit <nick134-bit@proton.me>",
   "homepage": "https://github.com/nick134-bit/nicks-injectivejs#readme",

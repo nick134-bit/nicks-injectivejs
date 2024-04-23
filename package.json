@@ -1,13 +1,13 @@
 {
   "name": "@nick134-bit/nicks-injectivejs",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "create proto and amino messages for injective",
   "author": "nick134-bit <nick134-bit@proton.me>",
   "homepage": "https://github.com/nick134-bit/nicks-injectivejs#readme",
   "license": "SEE LICENSE IN LICENSE",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "typings": "dist/index.d.ts",
+  "main": "dist/codegen/index.js",
+  "module": "dist/codegen/index.mjs",
+  "typings": "dist/codegen/index.d.ts",
   "directories": {
     "lib": "src"
   },

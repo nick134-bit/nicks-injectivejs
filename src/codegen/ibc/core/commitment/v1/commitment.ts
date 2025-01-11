@@ -1,6 +1,7 @@
-import { CommitmentProof, CommitmentProofAmino, CommitmentProofSDKType } from "../../../../cosmos/ics23/v1/proofs";
+import { CommitmentProof, CommitmentProofAmino } from "../../../../cosmos/ics23/v1/proofs";
 import { BinaryReader, BinaryWriter } from "../../../../binary";
 import { DeepPartial, bytesFromBase64, base64FromBytes } from "../../../../helpers";
+import { GlobalDecoderRegistry } from "../../../../registry";
 /**
  * MerkleRoot defines a merkle root hash.
  * In the Cosmos SDK, the AppHash of a block header becomes the root.
@@ -17,18 +18,11 @@ export interface MerkleRootProtoMsg {
  * In the Cosmos SDK, the AppHash of a block header becomes the root.
  */
 export interface MerkleRootAmino {
-  hash?: string;
+  hash: string;
 }
 export interface MerkleRootAminoMsg {
   type: "cosmos-sdk/MerkleRoot";
   value: MerkleRootAmino;
-}
-/**
- * MerkleRoot defines a merkle root hash.
- * In the Cosmos SDK, the AppHash of a block header becomes the root.
- */
-export interface MerkleRootSDKType {
-  hash: Uint8Array;
 }
 /**
  * MerklePrefix is merkle path prefixed to the key.
@@ -48,51 +42,11 @@ export interface MerklePrefixProtoMsg {
  * append(Path.KeyPrefix, key...))
  */
 export interface MerklePrefixAmino {
-  key_prefix?: string;
+  key_prefix: string;
 }
 export interface MerklePrefixAminoMsg {
   type: "cosmos-sdk/MerklePrefix";
   value: MerklePrefixAmino;
-}
-/**
- * MerklePrefix is merkle path prefixed to the key.
- * The constructed key from the Path and the key will be append(Path.KeyPath,
- * append(Path.KeyPrefix, key...))
- */
-export interface MerklePrefixSDKType {
-  key_prefix: Uint8Array;
-}
-/**
- * MerklePath is the path used to verify commitment proofs, which can be an
- * arbitrary structured object (defined by a commitment type).
- * MerklePath is represented from root-to-leaf
- */
-export interface MerklePath {
-  keyPath: string[];
-}
-export interface MerklePathProtoMsg {
-  typeUrl: "/ibc.core.commitment.v1.MerklePath";
-  value: Uint8Array;
-}
-/**
- * MerklePath is the path used to verify commitment proofs, which can be an
- * arbitrary structured object (defined by a commitment type).
- * MerklePath is represented from root-to-leaf
- */
-export interface MerklePathAmino {
-  key_path?: string[];
-}
-export interface MerklePathAminoMsg {
-  type: "cosmos-sdk/MerklePath";
-  value: MerklePathAmino;
-}
-/**
- * MerklePath is the path used to verify commitment proofs, which can be an
- * arbitrary structured object (defined by a commitment type).
- * MerklePath is represented from root-to-leaf
- */
-export interface MerklePathSDKType {
-  key_path: string[];
 }
 /**
  * MerkleProof is a wrapper type over a chain of CommitmentProofs.
@@ -116,21 +70,11 @@ export interface MerkleProofProtoMsg {
  * MerkleProofs are ordered from leaf-to-root
  */
 export interface MerkleProofAmino {
-  proofs?: CommitmentProofAmino[];
+  proofs: CommitmentProofAmino[];
 }
 export interface MerkleProofAminoMsg {
   type: "cosmos-sdk/MerkleProof";
   value: MerkleProofAmino;
-}
-/**
- * MerkleProof is a wrapper type over a chain of CommitmentProofs.
- * It demonstrates membership or non-membership for an element or set of
- * elements, verifiable in conjunction with a known commitment root. Proofs
- * should be succinct.
- * MerkleProofs are ordered from leaf-to-root
- */
-export interface MerkleProofSDKType {
-  proofs: CommitmentProofSDKType[];
 }
 function createBaseMerkleRoot(): MerkleRoot {
   return {
@@ -140,6 +84,12 @@ function createBaseMerkleRoot(): MerkleRoot {
 export const MerkleRoot = {
   typeUrl: "/ibc.core.commitment.v1.MerkleRoot",
   aminoType: "cosmos-sdk/MerkleRoot",
+  is(o: any): o is MerkleRoot {
+    return o && (o.$typeUrl === MerkleRoot.typeUrl || o.hash instanceof Uint8Array || typeof o.hash === "string");
+  },
+  isAmino(o: any): o is MerkleRootAmino {
+    return o && (o.$typeUrl === MerkleRoot.typeUrl || o.hash instanceof Uint8Array || typeof o.hash === "string");
+  },
   encode(message: MerkleRoot, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.hash.length !== 0) {
       writer.uint32(10).bytes(message.hash);
@@ -202,6 +152,8 @@ export const MerkleRoot = {
     };
   }
 };
+GlobalDecoderRegistry.register(MerkleRoot.typeUrl, MerkleRoot);
+GlobalDecoderRegistry.registerAminoProtoMapping(MerkleRoot.aminoType, MerkleRoot.typeUrl);
 function createBaseMerklePrefix(): MerklePrefix {
   return {
     keyPrefix: new Uint8Array()
@@ -210,6 +162,12 @@ function createBaseMerklePrefix(): MerklePrefix {
 export const MerklePrefix = {
   typeUrl: "/ibc.core.commitment.v1.MerklePrefix",
   aminoType: "cosmos-sdk/MerklePrefix",
+  is(o: any): o is MerklePrefix {
+    return o && (o.$typeUrl === MerklePrefix.typeUrl || o.keyPrefix instanceof Uint8Array || typeof o.keyPrefix === "string");
+  },
+  isAmino(o: any): o is MerklePrefixAmino {
+    return o && (o.$typeUrl === MerklePrefix.typeUrl || o.key_prefix instanceof Uint8Array || typeof o.key_prefix === "string");
+  },
   encode(message: MerklePrefix, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.keyPrefix.length !== 0) {
       writer.uint32(10).bytes(message.keyPrefix);
@@ -272,78 +230,8 @@ export const MerklePrefix = {
     };
   }
 };
-function createBaseMerklePath(): MerklePath {
-  return {
-    keyPath: []
-  };
-}
-export const MerklePath = {
-  typeUrl: "/ibc.core.commitment.v1.MerklePath",
-  aminoType: "cosmos-sdk/MerklePath",
-  encode(message: MerklePath, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
-    for (const v of message.keyPath) {
-      writer.uint32(10).string(v!);
-    }
-    return writer;
-  },
-  decode(input: BinaryReader | Uint8Array, length?: number): MerklePath {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseMerklePath();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.keyPath.push(reader.string());
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-  fromPartial(object: DeepPartial<MerklePath>): MerklePath {
-    const message = createBaseMerklePath();
-    message.keyPath = object.keyPath?.map(e => e) || [];
-    return message;
-  },
-  fromAmino(object: MerklePathAmino): MerklePath {
-    const message = createBaseMerklePath();
-    message.keyPath = object.key_path?.map(e => e) || [];
-    return message;
-  },
-  toAmino(message: MerklePath): MerklePathAmino {
-    const obj: any = {};
-    if (message.keyPath) {
-      obj.key_path = message.keyPath.map(e => e);
-    } else {
-      obj.key_path = message.keyPath;
-    }
-    return obj;
-  },
-  fromAminoMsg(object: MerklePathAminoMsg): MerklePath {
-    return MerklePath.fromAmino(object.value);
-  },
-  toAminoMsg(message: MerklePath): MerklePathAminoMsg {
-    return {
-      type: "cosmos-sdk/MerklePath",
-      value: MerklePath.toAmino(message)
-    };
-  },
-  fromProtoMsg(message: MerklePathProtoMsg): MerklePath {
-    return MerklePath.decode(message.value);
-  },
-  toProto(message: MerklePath): Uint8Array {
-    return MerklePath.encode(message).finish();
-  },
-  toProtoMsg(message: MerklePath): MerklePathProtoMsg {
-    return {
-      typeUrl: "/ibc.core.commitment.v1.MerklePath",
-      value: MerklePath.encode(message).finish()
-    };
-  }
-};
+GlobalDecoderRegistry.register(MerklePrefix.typeUrl, MerklePrefix);
+GlobalDecoderRegistry.registerAminoProtoMapping(MerklePrefix.aminoType, MerklePrefix.typeUrl);
 function createBaseMerkleProof(): MerkleProof {
   return {
     proofs: []
@@ -352,6 +240,12 @@ function createBaseMerkleProof(): MerkleProof {
 export const MerkleProof = {
   typeUrl: "/ibc.core.commitment.v1.MerkleProof",
   aminoType: "cosmos-sdk/MerkleProof",
+  is(o: any): o is MerkleProof {
+    return o && (o.$typeUrl === MerkleProof.typeUrl || Array.isArray(o.proofs) && (!o.proofs.length || CommitmentProof.is(o.proofs[0])));
+  },
+  isAmino(o: any): o is MerkleProofAmino {
+    return o && (o.$typeUrl === MerkleProof.typeUrl || Array.isArray(o.proofs) && (!o.proofs.length || CommitmentProof.isAmino(o.proofs[0])));
+  },
   encode(message: MerkleProof, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     for (const v of message.proofs) {
       CommitmentProof.encode(v!, writer.uint32(10).fork()).ldelim();
@@ -416,3 +310,5 @@ export const MerkleProof = {
     };
   }
 };
+GlobalDecoderRegistry.register(MerkleProof.typeUrl, MerkleProof);
+GlobalDecoderRegistry.registerAminoProtoMapping(MerkleProof.aminoType, MerkleProof.typeUrl);

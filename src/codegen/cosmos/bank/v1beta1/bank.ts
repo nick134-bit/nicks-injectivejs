@@ -1,6 +1,7 @@
-import { Coin, CoinAmino, CoinSDKType } from "../../base/v1beta1/coin";
+import { Coin, CoinAmino } from "../../base/v1beta1/coin";
 import { BinaryReader, BinaryWriter } from "../../../binary";
 import { DeepPartial } from "../../../helpers";
+import { GlobalDecoderRegistry } from "../../../registry";
 /** Params defines the parameters for the bank module. */
 export interface Params {
   /**
@@ -28,18 +29,12 @@ export interface ParamsAmino {
    * As of cosmos-sdk 0.47, this only exists for backwards compatibility of genesis files.
    */
   /** @deprecated */
-  send_enabled?: SendEnabledAmino[];
-  default_send_enabled?: boolean;
+  send_enabled: SendEnabledAmino[];
+  default_send_enabled: boolean;
 }
 export interface ParamsAminoMsg {
   type: "cosmos-sdk/x/bank/Params";
   value: ParamsAmino;
-}
-/** Params defines the parameters for the bank module. */
-export interface ParamsSDKType {
-  /** @deprecated */
-  send_enabled: SendEnabledSDKType[];
-  default_send_enabled: boolean;
 }
 /**
  * SendEnabled maps coin denom to a send_enabled status (whether a denom is
@@ -58,20 +53,12 @@ export interface SendEnabledProtoMsg {
  * sendable).
  */
 export interface SendEnabledAmino {
-  denom?: string;
-  enabled?: boolean;
+  denom: string;
+  enabled: boolean;
 }
 export interface SendEnabledAminoMsg {
   type: "cosmos-sdk/SendEnabled";
   value: SendEnabledAmino;
-}
-/**
- * SendEnabled maps coin denom to a send_enabled status (whether a denom is
- * sendable).
- */
-export interface SendEnabledSDKType {
-  denom: string;
-  enabled: boolean;
 }
 /** Input models transaction input. */
 export interface Input {
@@ -84,17 +71,12 @@ export interface InputProtoMsg {
 }
 /** Input models transaction input. */
 export interface InputAmino {
-  address?: string;
+  address: string;
   coins: CoinAmino[];
 }
 export interface InputAminoMsg {
   type: "cosmos-sdk/Input";
   value: InputAmino;
-}
-/** Input models transaction input. */
-export interface InputSDKType {
-  address: string;
-  coins: CoinSDKType[];
 }
 /** Output models transaction outputs. */
 export interface Output {
@@ -107,17 +89,12 @@ export interface OutputProtoMsg {
 }
 /** Output models transaction outputs. */
 export interface OutputAmino {
-  address?: string;
+  address: string;
   coins: CoinAmino[];
 }
 export interface OutputAminoMsg {
   type: "cosmos-sdk/Output";
   value: OutputAmino;
-}
-/** Output models transaction outputs. */
-export interface OutputSDKType {
-  address: string;
-  coins: CoinSDKType[];
 }
 /**
  * Supply represents a struct that passively keeps track of the total supply
@@ -126,7 +103,6 @@ export interface OutputSDKType {
  */
 /** @deprecated */
 export interface Supply {
-  $typeUrl?: "/cosmos.bank.v1beta1.Supply";
   total: Coin[];
 }
 export interface SupplyProtoMsg {
@@ -145,16 +121,6 @@ export interface SupplyAmino {
 export interface SupplyAminoMsg {
   type: "cosmos-sdk/Supply";
   value: SupplyAmino;
-}
-/**
- * Supply represents a struct that passively keeps track of the total supply
- * amounts in the network.
- * This message is deprecated now that supply is indexed by denom.
- */
-/** @deprecated */
-export interface SupplySDKType {
-  $typeUrl?: "/cosmos.bank.v1beta1.Supply";
-  total: CoinSDKType[];
 }
 /**
  * DenomUnit represents a struct that describes a given
@@ -184,7 +150,7 @@ export interface DenomUnitProtoMsg {
  */
 export interface DenomUnitAmino {
   /** denom represents the string name of the given denom unit (e.g uatom). */
-  denom?: string;
+  denom: string;
   /**
    * exponent represents power of 10 exponent that one must
    * raise the base_denom to in order to equal the given DenomUnit's denom
@@ -192,22 +158,13 @@ export interface DenomUnitAmino {
    * (e.g. with a base_denom of uatom, one can create a DenomUnit of 'atom' with
    * exponent = 6, thus: 1 atom = 10^6 uatom).
    */
-  exponent?: number;
+  exponent: number;
   /** aliases is a list of string aliases for the given denom */
-  aliases?: string[];
+  aliases: string[];
 }
 export interface DenomUnitAminoMsg {
   type: "cosmos-sdk/DenomUnit";
   value: DenomUnitAmino;
-}
-/**
- * DenomUnit represents a struct that describes a given
- * denomination unit of the basic token.
- */
-export interface DenomUnitSDKType {
-  denom: string;
-  exponent: number;
-  aliases: string[];
 }
 /**
  * Metadata represents a struct that describes
@@ -260,60 +217,46 @@ export interface MetadataProtoMsg {
  * a basic token.
  */
 export interface MetadataAmino {
-  description?: string;
+  description: string;
   /** denom_units represents the list of DenomUnit's for a given coin */
-  denom_units?: DenomUnitAmino[];
+  denom_units: DenomUnitAmino[];
   /** base represents the base denom (should be the DenomUnit with exponent = 0). */
-  base?: string;
+  base: string;
   /**
    * display indicates the suggested denom that should be
    * displayed in clients.
    */
-  display?: string;
+  display: string;
   /**
    * name defines the name of the token (eg: Cosmos Atom)
    * 
    * Since: cosmos-sdk 0.43
    */
-  name?: string;
+  name: string;
   /**
    * symbol is the token symbol usually shown on exchanges (eg: ATOM). This can
    * be the same as the display.
    * 
    * Since: cosmos-sdk 0.43
    */
-  symbol?: string;
+  symbol: string;
   /**
    * URI to a document (on or off-chain) that contains additional information. Optional.
    * 
    * Since: cosmos-sdk 0.46
    */
-  uri?: string;
+  uri: string;
   /**
    * URIHash is a sha256 hash of a document pointed by URI. It's used to verify that
    * the document didn't change. Optional.
    * 
    * Since: cosmos-sdk 0.46
    */
-  uri_hash?: string;
+  uri_hash: string;
 }
 export interface MetadataAminoMsg {
   type: "cosmos-sdk/Metadata";
   value: MetadataAmino;
-}
-/**
- * Metadata represents a struct that describes
- * a basic token.
- */
-export interface MetadataSDKType {
-  description: string;
-  denom_units: DenomUnitSDKType[];
-  base: string;
-  display: string;
-  name: string;
-  symbol: string;
-  uri: string;
-  uri_hash: string;
 }
 function createBaseParams(): Params {
   return {
@@ -324,6 +267,12 @@ function createBaseParams(): Params {
 export const Params = {
   typeUrl: "/cosmos.bank.v1beta1.Params",
   aminoType: "cosmos-sdk/x/bank/Params",
+  is(o: any): o is Params {
+    return o && (o.$typeUrl === Params.typeUrl || Array.isArray(o.sendEnabled) && (!o.sendEnabled.length || SendEnabled.is(o.sendEnabled[0])) && typeof o.defaultSendEnabled === "boolean");
+  },
+  isAmino(o: any): o is ParamsAmino {
+    return o && (o.$typeUrl === Params.typeUrl || Array.isArray(o.send_enabled) && (!o.send_enabled.length || SendEnabled.isAmino(o.send_enabled[0])) && typeof o.default_send_enabled === "boolean");
+  },
   encode(message: Params, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     for (const v of message.sendEnabled) {
       SendEnabled.encode(v!, writer.uint32(10).fork()).ldelim();
@@ -399,6 +348,8 @@ export const Params = {
     };
   }
 };
+GlobalDecoderRegistry.register(Params.typeUrl, Params);
+GlobalDecoderRegistry.registerAminoProtoMapping(Params.aminoType, Params.typeUrl);
 function createBaseSendEnabled(): SendEnabled {
   return {
     denom: "",
@@ -408,6 +359,12 @@ function createBaseSendEnabled(): SendEnabled {
 export const SendEnabled = {
   typeUrl: "/cosmos.bank.v1beta1.SendEnabled",
   aminoType: "cosmos-sdk/SendEnabled",
+  is(o: any): o is SendEnabled {
+    return o && (o.$typeUrl === SendEnabled.typeUrl || typeof o.denom === "string" && typeof o.enabled === "boolean");
+  },
+  isAmino(o: any): o is SendEnabledAmino {
+    return o && (o.$typeUrl === SendEnabled.typeUrl || typeof o.denom === "string" && typeof o.enabled === "boolean");
+  },
   encode(message: SendEnabled, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.denom !== "") {
       writer.uint32(10).string(message.denom);
@@ -481,6 +438,8 @@ export const SendEnabled = {
     };
   }
 };
+GlobalDecoderRegistry.register(SendEnabled.typeUrl, SendEnabled);
+GlobalDecoderRegistry.registerAminoProtoMapping(SendEnabled.aminoType, SendEnabled.typeUrl);
 function createBaseInput(): Input {
   return {
     address: "",
@@ -490,6 +449,12 @@ function createBaseInput(): Input {
 export const Input = {
   typeUrl: "/cosmos.bank.v1beta1.Input",
   aminoType: "cosmos-sdk/Input",
+  is(o: any): o is Input {
+    return o && (o.$typeUrl === Input.typeUrl || typeof o.address === "string" && Array.isArray(o.coins) && (!o.coins.length || Coin.is(o.coins[0])));
+  },
+  isAmino(o: any): o is InputAmino {
+    return o && (o.$typeUrl === Input.typeUrl || typeof o.address === "string" && Array.isArray(o.coins) && (!o.coins.length || Coin.isAmino(o.coins[0])));
+  },
   encode(message: Input, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.address !== "") {
       writer.uint32(10).string(message.address);
@@ -565,6 +530,8 @@ export const Input = {
     };
   }
 };
+GlobalDecoderRegistry.register(Input.typeUrl, Input);
+GlobalDecoderRegistry.registerAminoProtoMapping(Input.aminoType, Input.typeUrl);
 function createBaseOutput(): Output {
   return {
     address: "",
@@ -574,6 +541,12 @@ function createBaseOutput(): Output {
 export const Output = {
   typeUrl: "/cosmos.bank.v1beta1.Output",
   aminoType: "cosmos-sdk/Output",
+  is(o: any): o is Output {
+    return o && (o.$typeUrl === Output.typeUrl || typeof o.address === "string" && Array.isArray(o.coins) && (!o.coins.length || Coin.is(o.coins[0])));
+  },
+  isAmino(o: any): o is OutputAmino {
+    return o && (o.$typeUrl === Output.typeUrl || typeof o.address === "string" && Array.isArray(o.coins) && (!o.coins.length || Coin.isAmino(o.coins[0])));
+  },
   encode(message: Output, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.address !== "") {
       writer.uint32(10).string(message.address);
@@ -649,15 +622,22 @@ export const Output = {
     };
   }
 };
+GlobalDecoderRegistry.register(Output.typeUrl, Output);
+GlobalDecoderRegistry.registerAminoProtoMapping(Output.aminoType, Output.typeUrl);
 function createBaseSupply(): Supply {
   return {
-    $typeUrl: "/cosmos.bank.v1beta1.Supply",
     total: []
   };
 }
 export const Supply = {
   typeUrl: "/cosmos.bank.v1beta1.Supply",
   aminoType: "cosmos-sdk/Supply",
+  is(o: any): o is Supply {
+    return o && (o.$typeUrl === Supply.typeUrl || Array.isArray(o.total) && (!o.total.length || Coin.is(o.total[0])));
+  },
+  isAmino(o: any): o is SupplyAmino {
+    return o && (o.$typeUrl === Supply.typeUrl || Array.isArray(o.total) && (!o.total.length || Coin.isAmino(o.total[0])));
+  },
   encode(message: Supply, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     for (const v of message.total) {
       Coin.encode(v!, writer.uint32(10).fork()).ldelim();
@@ -722,6 +702,8 @@ export const Supply = {
     };
   }
 };
+GlobalDecoderRegistry.register(Supply.typeUrl, Supply);
+GlobalDecoderRegistry.registerAminoProtoMapping(Supply.aminoType, Supply.typeUrl);
 function createBaseDenomUnit(): DenomUnit {
   return {
     denom: "",
@@ -732,6 +714,12 @@ function createBaseDenomUnit(): DenomUnit {
 export const DenomUnit = {
   typeUrl: "/cosmos.bank.v1beta1.DenomUnit",
   aminoType: "cosmos-sdk/DenomUnit",
+  is(o: any): o is DenomUnit {
+    return o && (o.$typeUrl === DenomUnit.typeUrl || typeof o.denom === "string" && typeof o.exponent === "number" && Array.isArray(o.aliases) && (!o.aliases.length || typeof o.aliases[0] === "string"));
+  },
+  isAmino(o: any): o is DenomUnitAmino {
+    return o && (o.$typeUrl === DenomUnit.typeUrl || typeof o.denom === "string" && typeof o.exponent === "number" && Array.isArray(o.aliases) && (!o.aliases.length || typeof o.aliases[0] === "string"));
+  },
   encode(message: DenomUnit, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.denom !== "") {
       writer.uint32(10).string(message.denom);
@@ -818,6 +806,8 @@ export const DenomUnit = {
     };
   }
 };
+GlobalDecoderRegistry.register(DenomUnit.typeUrl, DenomUnit);
+GlobalDecoderRegistry.registerAminoProtoMapping(DenomUnit.aminoType, DenomUnit.typeUrl);
 function createBaseMetadata(): Metadata {
   return {
     description: "",
@@ -833,6 +823,12 @@ function createBaseMetadata(): Metadata {
 export const Metadata = {
   typeUrl: "/cosmos.bank.v1beta1.Metadata",
   aminoType: "cosmos-sdk/Metadata",
+  is(o: any): o is Metadata {
+    return o && (o.$typeUrl === Metadata.typeUrl || typeof o.description === "string" && Array.isArray(o.denomUnits) && (!o.denomUnits.length || DenomUnit.is(o.denomUnits[0])) && typeof o.base === "string" && typeof o.display === "string" && typeof o.name === "string" && typeof o.symbol === "string" && typeof o.uri === "string" && typeof o.uriHash === "string");
+  },
+  isAmino(o: any): o is MetadataAmino {
+    return o && (o.$typeUrl === Metadata.typeUrl || typeof o.description === "string" && Array.isArray(o.denom_units) && (!o.denom_units.length || DenomUnit.isAmino(o.denom_units[0])) && typeof o.base === "string" && typeof o.display === "string" && typeof o.name === "string" && typeof o.symbol === "string" && typeof o.uri === "string" && typeof o.uri_hash === "string");
+  },
   encode(message: Metadata, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.description !== "") {
       writer.uint32(10).string(message.description);
@@ -974,3 +970,5 @@ export const Metadata = {
     };
   }
 };
+GlobalDecoderRegistry.register(Metadata.typeUrl, Metadata);
+GlobalDecoderRegistry.registerAminoProtoMapping(Metadata.aminoType, Metadata.typeUrl);

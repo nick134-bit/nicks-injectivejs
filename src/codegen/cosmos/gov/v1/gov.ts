@@ -1,9 +1,10 @@
-import { Coin, CoinAmino, CoinSDKType } from "../../base/v1beta1/coin";
-import { Any, AnyAmino, AnySDKType } from "../../../google/protobuf/any";
+import { Coin, CoinAmino } from "../../base/v1beta1/coin";
+import { Any, AnyAmino } from "../../../google/protobuf/any";
 import { Timestamp } from "../../../google/protobuf/timestamp";
-import { Duration, DurationAmino, DurationSDKType } from "../../../google/protobuf/duration";
+import { Duration, DurationAmino } from "../../../google/protobuf/duration";
+import { isSet, DeepPartial, toTimestamp, fromTimestamp } from "../../../helpers";
 import { BinaryReader, BinaryWriter } from "../../../binary";
-import { DeepPartial, toTimestamp, fromTimestamp } from "../../../helpers";
+import { GlobalDecoderRegistry } from "../../../registry";
 /** VoteOption enumerates the valid vote options for a given governance proposal. */
 export enum VoteOption {
   /** VOTE_OPTION_UNSPECIFIED - VOTE_OPTION_UNSPECIFIED defines a no-op vote option. */
@@ -18,7 +19,6 @@ export enum VoteOption {
   VOTE_OPTION_NO_WITH_VETO = 4,
   UNRECOGNIZED = -1,
 }
-export const VoteOptionSDKType = VoteOption;
 export const VoteOptionAmino = VoteOption;
 export function voteOptionFromJSON(object: any): VoteOption {
   switch (object) {
@@ -91,7 +91,6 @@ export enum ProposalStatus {
   PROPOSAL_STATUS_FAILED = 5,
   UNRECOGNIZED = -1,
 }
-export const ProposalStatusSDKType = ProposalStatus;
 export const ProposalStatusAmino = ProposalStatus;
 export function proposalStatusFromJSON(object: any): ProposalStatus {
   switch (object) {
@@ -152,18 +151,13 @@ export interface WeightedVoteOptionProtoMsg {
 /** WeightedVoteOption defines a unit of vote for vote split. */
 export interface WeightedVoteOptionAmino {
   /** option defines the valid vote options, it must not contain duplicate vote options. */
-  option?: VoteOption;
+  option: VoteOption;
   /** weight is the vote weight associated with the vote option. */
-  weight?: string;
+  weight: string;
 }
 export interface WeightedVoteOptionAminoMsg {
   type: "cosmos-sdk/v1/WeightedVoteOption";
   value: WeightedVoteOptionAmino;
-}
-/** WeightedVoteOption defines a unit of vote for vote split. */
-export interface WeightedVoteOptionSDKType {
-  option: VoteOption;
-  weight: string;
 }
 /**
  * Deposit defines an amount deposited by an account address to an active
@@ -187,24 +181,15 @@ export interface DepositProtoMsg {
  */
 export interface DepositAmino {
   /** proposal_id defines the unique id of the proposal. */
-  proposal_id?: string;
+  proposal_id: string;
   /** depositor defines the deposit addresses from the proposals. */
-  depositor?: string;
+  depositor: string;
   /** amount to be deposited by depositor. */
   amount: CoinAmino[];
 }
 export interface DepositAminoMsg {
   type: "cosmos-sdk/v1/Deposit";
   value: DepositAmino;
-}
-/**
- * Deposit defines an amount deposited by an account address to an active
- * proposal.
- */
-export interface DepositSDKType {
-  proposal_id: bigint;
-  depositor: string;
-  amount: CoinSDKType[];
 }
 /** Proposal defines the core field members of a governance proposal. */
 export interface Proposal {
@@ -230,7 +215,11 @@ export interface Proposal {
   votingStartTime?: Date;
   /** voting_end_time is the end time of voting on a proposal. */
   votingEndTime?: Date;
-  /** metadata is any arbitrary metadata attached to the proposal. */
+  /**
+   * metadata is any arbitrary metadata attached to the proposal.
+   * the recommended format of the metadata is to be found here:
+   * https://docs.cosmos.network/v0.47/modules/gov#proposal-3
+   */
   metadata: string;
   /**
    * title is the title of the proposal
@@ -245,11 +234,23 @@ export interface Proposal {
    */
   summary: string;
   /**
-   * Proposer is the address of the proposal sumbitter
+   * proposer is the address of the proposal sumbitter
    * 
    * Since: cosmos-sdk 0.47
    */
   proposer: string;
+  /**
+   * expedited defines if the proposal is expedited
+   * 
+   * Since: cosmos-sdk 0.50
+   */
+  expedited: boolean;
+  /**
+   * failed_reason defines the reason why the proposal failed
+   * 
+   * Since: cosmos-sdk 0.50
+   */
+  failedReason: string;
 }
 export interface ProposalProtoMsg {
   typeUrl: "/cosmos.gov.v1.Proposal";
@@ -258,11 +259,11 @@ export interface ProposalProtoMsg {
 /** Proposal defines the core field members of a governance proposal. */
 export interface ProposalAmino {
   /** id defines the unique id of the proposal. */
-  id?: string;
+  id: string;
   /** messages are the arbitrary messages to be executed if the proposal passes. */
-  messages?: AnyAmino[];
+  messages: AnyAmino[];
   /** status defines the proposal status. */
-  status?: ProposalStatus;
+  status: ProposalStatus;
   /**
    * final_tally_result is the final tally result of the proposal. When
    * querying a proposal via gRPC, this field is not populated until the
@@ -279,46 +280,46 @@ export interface ProposalAmino {
   voting_start_time?: string;
   /** voting_end_time is the end time of voting on a proposal. */
   voting_end_time?: string;
-  /** metadata is any arbitrary metadata attached to the proposal. */
-  metadata?: string;
+  /**
+   * metadata is any arbitrary metadata attached to the proposal.
+   * the recommended format of the metadata is to be found here:
+   * https://docs.cosmos.network/v0.47/modules/gov#proposal-3
+   */
+  metadata: string;
   /**
    * title is the title of the proposal
    * 
    * Since: cosmos-sdk 0.47
    */
-  title?: string;
+  title: string;
   /**
    * summary is a short summary of the proposal
    * 
    * Since: cosmos-sdk 0.47
    */
-  summary?: string;
+  summary: string;
   /**
-   * Proposer is the address of the proposal sumbitter
+   * proposer is the address of the proposal sumbitter
    * 
    * Since: cosmos-sdk 0.47
    */
-  proposer?: string;
+  proposer: string;
+  /**
+   * expedited defines if the proposal is expedited
+   * 
+   * Since: cosmos-sdk 0.50
+   */
+  expedited: boolean;
+  /**
+   * failed_reason defines the reason why the proposal failed
+   * 
+   * Since: cosmos-sdk 0.50
+   */
+  failed_reason: string;
 }
 export interface ProposalAminoMsg {
   type: "cosmos-sdk/v1/Proposal";
   value: ProposalAmino;
-}
-/** Proposal defines the core field members of a governance proposal. */
-export interface ProposalSDKType {
-  id: bigint;
-  messages: AnySDKType[];
-  status: ProposalStatus;
-  final_tally_result?: TallyResultSDKType;
-  submit_time?: Date;
-  deposit_end_time?: Date;
-  total_deposit: CoinSDKType[];
-  voting_start_time?: Date;
-  voting_end_time?: Date;
-  metadata: string;
-  title: string;
-  summary: string;
-  proposer: string;
 }
 /** TallyResult defines a standard tally for a governance proposal. */
 export interface TallyResult {
@@ -338,24 +339,17 @@ export interface TallyResultProtoMsg {
 /** TallyResult defines a standard tally for a governance proposal. */
 export interface TallyResultAmino {
   /** yes_count is the number of yes votes on a proposal. */
-  yes_count?: string;
+  yes_count: string;
   /** abstain_count is the number of abstain votes on a proposal. */
-  abstain_count?: string;
+  abstain_count: string;
   /** no_count is the number of no votes on a proposal. */
-  no_count?: string;
+  no_count: string;
   /** no_with_veto_count is the number of no with veto votes on a proposal. */
-  no_with_veto_count?: string;
+  no_with_veto_count: string;
 }
 export interface TallyResultAminoMsg {
   type: "cosmos-sdk/v1/TallyResult";
   value: TallyResultAmino;
-}
-/** TallyResult defines a standard tally for a governance proposal. */
-export interface TallyResultSDKType {
-  yes_count: string;
-  abstain_count: string;
-  no_count: string;
-  no_with_veto_count: string;
 }
 /**
  * Vote defines a vote on a governance proposal.
@@ -368,7 +362,10 @@ export interface Vote {
   voter: string;
   /** options is the weighted vote options. */
   options: WeightedVoteOption[];
-  /** metadata is any  arbitrary metadata to attached to the vote. */
+  /**
+   * metadata is any arbitrary metadata attached to the vote.
+   * the recommended format of the metadata is to be found here: https://docs.cosmos.network/v0.47/modules/gov#vote-5
+   */
   metadata: string;
 }
 export interface VoteProtoMsg {
@@ -381,29 +378,23 @@ export interface VoteProtoMsg {
  */
 export interface VoteAmino {
   /** proposal_id defines the unique id of the proposal. */
-  proposal_id?: string;
+  proposal_id: string;
   /** voter is the voter address of the proposal. */
-  voter?: string;
+  voter: string;
   /** options is the weighted vote options. */
-  options?: WeightedVoteOptionAmino[];
-  /** metadata is any  arbitrary metadata to attached to the vote. */
-  metadata?: string;
+  options: WeightedVoteOptionAmino[];
+  /**
+   * metadata is any arbitrary metadata attached to the vote.
+   * the recommended format of the metadata is to be found here: https://docs.cosmos.network/v0.47/modules/gov#vote-5
+   */
+  metadata: string;
 }
 export interface VoteAminoMsg {
   type: "cosmos-sdk/v1/Vote";
   value: VoteAmino;
 }
-/**
- * Vote defines a vote on a governance proposal.
- * A Vote consists of a proposal ID, the voter, and the vote option.
- */
-export interface VoteSDKType {
-  proposal_id: bigint;
-  voter: string;
-  options: WeightedVoteOptionSDKType[];
-  metadata: string;
-}
 /** DepositParams defines the params for deposits on governance proposals. */
+/** @deprecated */
 export interface DepositParams {
   /** Minimum deposit for a proposal to enter voting period. */
   minDeposit: Coin[];
@@ -418,9 +409,10 @@ export interface DepositParamsProtoMsg {
   value: Uint8Array;
 }
 /** DepositParams defines the params for deposits on governance proposals. */
+/** @deprecated */
 export interface DepositParamsAmino {
   /** Minimum deposit for a proposal to enter voting period. */
-  min_deposit?: CoinAmino[];
+  min_deposit: CoinAmino[];
   /**
    * Maximum period for Atom holders to deposit on a proposal. Initial value: 2
    * months.
@@ -431,12 +423,8 @@ export interface DepositParamsAminoMsg {
   type: "cosmos-sdk/v1/DepositParams";
   value: DepositParamsAmino;
 }
-/** DepositParams defines the params for deposits on governance proposals. */
-export interface DepositParamsSDKType {
-  min_deposit: CoinSDKType[];
-  max_deposit_period?: DurationSDKType;
-}
 /** VotingParams defines the params for voting on governance proposals. */
+/** @deprecated */
 export interface VotingParams {
   /** Duration of the voting period. */
   votingPeriod?: Duration;
@@ -446,6 +434,7 @@ export interface VotingParamsProtoMsg {
   value: Uint8Array;
 }
 /** VotingParams defines the params for voting on governance proposals. */
+/** @deprecated */
 export interface VotingParamsAmino {
   /** Duration of the voting period. */
   voting_period?: DurationAmino;
@@ -454,11 +443,8 @@ export interface VotingParamsAminoMsg {
   type: "cosmos-sdk/v1/VotingParams";
   value: VotingParamsAmino;
 }
-/** VotingParams defines the params for voting on governance proposals. */
-export interface VotingParamsSDKType {
-  voting_period?: DurationSDKType;
-}
 /** TallyParams defines the params for tallying votes on governance proposals. */
+/** @deprecated */
 export interface TallyParams {
   /**
    * Minimum percentage of total stake needed to vote for a result to be
@@ -478,29 +464,24 @@ export interface TallyParamsProtoMsg {
   value: Uint8Array;
 }
 /** TallyParams defines the params for tallying votes on governance proposals. */
+/** @deprecated */
 export interface TallyParamsAmino {
   /**
    * Minimum percentage of total stake needed to vote for a result to be
    * considered valid.
    */
-  quorum?: string;
+  quorum: string;
   /** Minimum proportion of Yes votes for proposal to pass. Default value: 0.5. */
-  threshold?: string;
+  threshold: string;
   /**
    * Minimum value of Veto votes to Total votes ratio for proposal to be
    * vetoed. Default value: 1/3.
    */
-  veto_threshold?: string;
+  veto_threshold: string;
 }
 export interface TallyParamsAminoMsg {
   type: "cosmos-sdk/v1/TallyParams";
   value: TallyParamsAmino;
-}
-/** TallyParams defines the params for tallying votes on governance proposals. */
-export interface TallyParamsSDKType {
-  quorum: string;
-  threshold: string;
-  veto_threshold: string;
 }
 /**
  * Params defines the parameters for the x/gov module.
@@ -531,12 +512,47 @@ export interface Params {
   vetoThreshold: string;
   /** The ratio representing the proportion of the deposit value that must be paid at proposal submission. */
   minInitialDepositRatio: string;
+  /**
+   * The cancel ratio which will not be returned back to the depositors when a proposal is cancelled.
+   * 
+   * Since: cosmos-sdk 0.50
+   */
+  proposalCancelRatio: string;
+  /**
+   * The address which will receive (proposal_cancel_ratio * deposit) proposal deposits.
+   * If empty, the (proposal_cancel_ratio * deposit) proposal deposits will be burned.
+   * 
+   * Since: cosmos-sdk 0.50
+   */
+  proposalCancelDest: string;
+  /**
+   * Duration of the voting period of an expedited proposal.
+   * 
+   * Since: cosmos-sdk 0.50
+   */
+  expeditedVotingPeriod?: Duration;
+  /**
+   * Minimum proportion of Yes votes for proposal to pass. Default value: 0.67.
+   * 
+   * Since: cosmos-sdk 0.50
+   */
+  expeditedThreshold: string;
+  /** Minimum expedited deposit for a proposal to enter voting period. */
+  expeditedMinDeposit: Coin[];
   /** burn deposits if a proposal does not meet quorum */
   burnVoteQuorum: boolean;
   /** burn deposits if the proposal does not enter voting period */
   burnProposalDepositPrevote: boolean;
   /** burn deposits if quorum with vote type no_veto is met */
   burnVoteVeto: boolean;
+  /**
+   * The ratio representing the proportion of the deposit value minimum that must be met when making a deposit.
+   * Default value: 0.01. Meaning that for a chain with a min_deposit of 100stake, a deposit of 1stake would be
+   * required.
+   * 
+   * Since: cosmos-sdk 0.50
+   */
+  minDepositRatio: string;
 }
 export interface ParamsProtoMsg {
   typeUrl: "/cosmos.gov.v1.Params";
@@ -561,43 +577,61 @@ export interface ParamsAmino {
    * Minimum percentage of total stake needed to vote for a result to be
    *  considered valid.
    */
-  quorum?: string;
+  quorum: string;
   /** Minimum proportion of Yes votes for proposal to pass. Default value: 0.5. */
-  threshold?: string;
+  threshold: string;
   /**
    * Minimum value of Veto votes to Total votes ratio for proposal to be
    *  vetoed. Default value: 1/3.
    */
-  veto_threshold?: string;
+  veto_threshold: string;
   /** The ratio representing the proportion of the deposit value that must be paid at proposal submission. */
-  min_initial_deposit_ratio?: string;
+  min_initial_deposit_ratio: string;
+  /**
+   * The cancel ratio which will not be returned back to the depositors when a proposal is cancelled.
+   * 
+   * Since: cosmos-sdk 0.50
+   */
+  proposal_cancel_ratio: string;
+  /**
+   * The address which will receive (proposal_cancel_ratio * deposit) proposal deposits.
+   * If empty, the (proposal_cancel_ratio * deposit) proposal deposits will be burned.
+   * 
+   * Since: cosmos-sdk 0.50
+   */
+  proposal_cancel_dest: string;
+  /**
+   * Duration of the voting period of an expedited proposal.
+   * 
+   * Since: cosmos-sdk 0.50
+   */
+  expedited_voting_period?: DurationAmino;
+  /**
+   * Minimum proportion of Yes votes for proposal to pass. Default value: 0.67.
+   * 
+   * Since: cosmos-sdk 0.50
+   */
+  expedited_threshold: string;
+  /** Minimum expedited deposit for a proposal to enter voting period. */
+  expedited_min_deposit: CoinAmino[];
   /** burn deposits if a proposal does not meet quorum */
-  burn_vote_quorum?: boolean;
+  burn_vote_quorum: boolean;
   /** burn deposits if the proposal does not enter voting period */
-  burn_proposal_deposit_prevote?: boolean;
+  burn_proposal_deposit_prevote: boolean;
   /** burn deposits if quorum with vote type no_veto is met */
-  burn_vote_veto?: boolean;
+  burn_vote_veto: boolean;
+  /**
+   * The ratio representing the proportion of the deposit value minimum that must be met when making a deposit.
+   * Default value: 0.01. Meaning that for a chain with a min_deposit of 100stake, a deposit of 1stake would be
+   * required.
+   * 
+   * Since: cosmos-sdk 0.50
+   */
+  min_deposit_ratio: string;
 }
 export interface ParamsAminoMsg {
   type: "cosmos-sdk/v1/Params";
   value: ParamsAmino;
-}
-/**
- * Params defines the parameters for the x/gov module.
- * 
- * Since: cosmos-sdk 0.47
- */
-export interface ParamsSDKType {
-  min_deposit: CoinSDKType[];
-  max_deposit_period?: DurationSDKType;
-  voting_period?: DurationSDKType;
-  quorum: string;
-  threshold: string;
-  veto_threshold: string;
-  min_initial_deposit_ratio: string;
-  burn_vote_quorum: boolean;
-  burn_proposal_deposit_prevote: boolean;
-  burn_vote_veto: boolean;
 }
 function createBaseWeightedVoteOption(): WeightedVoteOption {
   return {
@@ -608,6 +642,12 @@ function createBaseWeightedVoteOption(): WeightedVoteOption {
 export const WeightedVoteOption = {
   typeUrl: "/cosmos.gov.v1.WeightedVoteOption",
   aminoType: "cosmos-sdk/v1/WeightedVoteOption",
+  is(o: any): o is WeightedVoteOption {
+    return o && (o.$typeUrl === WeightedVoteOption.typeUrl || isSet(o.option) && typeof o.weight === "string");
+  },
+  isAmino(o: any): o is WeightedVoteOptionAmino {
+    return o && (o.$typeUrl === WeightedVoteOption.typeUrl || isSet(o.option) && typeof o.weight === "string");
+  },
   encode(message: WeightedVoteOption, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.option !== 0) {
       writer.uint32(8).int32(message.option);
@@ -625,7 +665,7 @@ export const WeightedVoteOption = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.option = (reader.int32() as any);
+          message.option = reader.int32() as any;
           break;
         case 2:
           message.weight = reader.string();
@@ -681,6 +721,8 @@ export const WeightedVoteOption = {
     };
   }
 };
+GlobalDecoderRegistry.register(WeightedVoteOption.typeUrl, WeightedVoteOption);
+GlobalDecoderRegistry.registerAminoProtoMapping(WeightedVoteOption.aminoType, WeightedVoteOption.typeUrl);
 function createBaseDeposit(): Deposit {
   return {
     proposalId: BigInt(0),
@@ -691,6 +733,12 @@ function createBaseDeposit(): Deposit {
 export const Deposit = {
   typeUrl: "/cosmos.gov.v1.Deposit",
   aminoType: "cosmos-sdk/v1/Deposit",
+  is(o: any): o is Deposit {
+    return o && (o.$typeUrl === Deposit.typeUrl || typeof o.proposalId === "bigint" && typeof o.depositor === "string" && Array.isArray(o.amount) && (!o.amount.length || Coin.is(o.amount[0])));
+  },
+  isAmino(o: any): o is DepositAmino {
+    return o && (o.$typeUrl === Deposit.typeUrl || typeof o.proposal_id === "bigint" && typeof o.depositor === "string" && Array.isArray(o.amount) && (!o.amount.length || Coin.isAmino(o.amount[0])));
+  },
   encode(message: Deposit, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.proposalId !== BigInt(0)) {
       writer.uint32(8).uint64(message.proposalId);
@@ -777,6 +825,8 @@ export const Deposit = {
     };
   }
 };
+GlobalDecoderRegistry.register(Deposit.typeUrl, Deposit);
+GlobalDecoderRegistry.registerAminoProtoMapping(Deposit.aminoType, Deposit.typeUrl);
 function createBaseProposal(): Proposal {
   return {
     id: BigInt(0),
@@ -791,12 +841,20 @@ function createBaseProposal(): Proposal {
     metadata: "",
     title: "",
     summary: "",
-    proposer: ""
+    proposer: "",
+    expedited: false,
+    failedReason: ""
   };
 }
 export const Proposal = {
   typeUrl: "/cosmos.gov.v1.Proposal",
   aminoType: "cosmos-sdk/v1/Proposal",
+  is(o: any): o is Proposal {
+    return o && (o.$typeUrl === Proposal.typeUrl || typeof o.id === "bigint" && Array.isArray(o.messages) && (!o.messages.length || Any.is(o.messages[0])) && isSet(o.status) && Array.isArray(o.totalDeposit) && (!o.totalDeposit.length || Coin.is(o.totalDeposit[0])) && typeof o.metadata === "string" && typeof o.title === "string" && typeof o.summary === "string" && typeof o.proposer === "string" && typeof o.expedited === "boolean" && typeof o.failedReason === "string");
+  },
+  isAmino(o: any): o is ProposalAmino {
+    return o && (o.$typeUrl === Proposal.typeUrl || typeof o.id === "bigint" && Array.isArray(o.messages) && (!o.messages.length || Any.isAmino(o.messages[0])) && isSet(o.status) && Array.isArray(o.total_deposit) && (!o.total_deposit.length || Coin.isAmino(o.total_deposit[0])) && typeof o.metadata === "string" && typeof o.title === "string" && typeof o.summary === "string" && typeof o.proposer === "string" && typeof o.expedited === "boolean" && typeof o.failed_reason === "string");
+  },
   encode(message: Proposal, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.id !== BigInt(0)) {
       writer.uint32(8).uint64(message.id);
@@ -837,6 +895,12 @@ export const Proposal = {
     if (message.proposer !== "") {
       writer.uint32(106).string(message.proposer);
     }
+    if (message.expedited === true) {
+      writer.uint32(112).bool(message.expedited);
+    }
+    if (message.failedReason !== "") {
+      writer.uint32(122).string(message.failedReason);
+    }
     return writer;
   },
   decode(input: BinaryReader | Uint8Array, length?: number): Proposal {
@@ -853,7 +917,7 @@ export const Proposal = {
           message.messages.push(Any.decode(reader, reader.uint32()));
           break;
         case 3:
-          message.status = (reader.int32() as any);
+          message.status = reader.int32() as any;
           break;
         case 4:
           message.finalTallyResult = TallyResult.decode(reader, reader.uint32());
@@ -885,6 +949,12 @@ export const Proposal = {
         case 13:
           message.proposer = reader.string();
           break;
+        case 14:
+          message.expedited = reader.bool();
+          break;
+        case 15:
+          message.failedReason = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -907,6 +977,8 @@ export const Proposal = {
     message.title = object.title ?? "";
     message.summary = object.summary ?? "";
     message.proposer = object.proposer ?? "";
+    message.expedited = object.expedited ?? false;
+    message.failedReason = object.failedReason ?? "";
     return message;
   },
   fromAmino(object: ProposalAmino): Proposal {
@@ -946,6 +1018,12 @@ export const Proposal = {
     if (object.proposer !== undefined && object.proposer !== null) {
       message.proposer = object.proposer;
     }
+    if (object.expedited !== undefined && object.expedited !== null) {
+      message.expedited = object.expedited;
+    }
+    if (object.failed_reason !== undefined && object.failed_reason !== null) {
+      message.failedReason = object.failed_reason;
+    }
     return message;
   },
   toAmino(message: Proposal): ProposalAmino {
@@ -971,6 +1049,8 @@ export const Proposal = {
     obj.title = message.title === "" ? undefined : message.title;
     obj.summary = message.summary === "" ? undefined : message.summary;
     obj.proposer = message.proposer === "" ? undefined : message.proposer;
+    obj.expedited = message.expedited === false ? undefined : message.expedited;
+    obj.failed_reason = message.failedReason === "" ? undefined : message.failedReason;
     return obj;
   },
   fromAminoMsg(object: ProposalAminoMsg): Proposal {
@@ -995,6 +1075,8 @@ export const Proposal = {
     };
   }
 };
+GlobalDecoderRegistry.register(Proposal.typeUrl, Proposal);
+GlobalDecoderRegistry.registerAminoProtoMapping(Proposal.aminoType, Proposal.typeUrl);
 function createBaseTallyResult(): TallyResult {
   return {
     yesCount: "",
@@ -1006,6 +1088,12 @@ function createBaseTallyResult(): TallyResult {
 export const TallyResult = {
   typeUrl: "/cosmos.gov.v1.TallyResult",
   aminoType: "cosmos-sdk/v1/TallyResult",
+  is(o: any): o is TallyResult {
+    return o && (o.$typeUrl === TallyResult.typeUrl || typeof o.yesCount === "string" && typeof o.abstainCount === "string" && typeof o.noCount === "string" && typeof o.noWithVetoCount === "string");
+  },
+  isAmino(o: any): o is TallyResultAmino {
+    return o && (o.$typeUrl === TallyResult.typeUrl || typeof o.yes_count === "string" && typeof o.abstain_count === "string" && typeof o.no_count === "string" && typeof o.no_with_veto_count === "string");
+  },
   encode(message: TallyResult, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.yesCount !== "") {
       writer.uint32(10).string(message.yesCount);
@@ -1101,6 +1189,8 @@ export const TallyResult = {
     };
   }
 };
+GlobalDecoderRegistry.register(TallyResult.typeUrl, TallyResult);
+GlobalDecoderRegistry.registerAminoProtoMapping(TallyResult.aminoType, TallyResult.typeUrl);
 function createBaseVote(): Vote {
   return {
     proposalId: BigInt(0),
@@ -1112,6 +1202,12 @@ function createBaseVote(): Vote {
 export const Vote = {
   typeUrl: "/cosmos.gov.v1.Vote",
   aminoType: "cosmos-sdk/v1/Vote",
+  is(o: any): o is Vote {
+    return o && (o.$typeUrl === Vote.typeUrl || typeof o.proposalId === "bigint" && typeof o.voter === "string" && Array.isArray(o.options) && (!o.options.length || WeightedVoteOption.is(o.options[0])) && typeof o.metadata === "string");
+  },
+  isAmino(o: any): o is VoteAmino {
+    return o && (o.$typeUrl === Vote.typeUrl || typeof o.proposal_id === "bigint" && typeof o.voter === "string" && Array.isArray(o.options) && (!o.options.length || WeightedVoteOption.isAmino(o.options[0])) && typeof o.metadata === "string");
+  },
   encode(message: Vote, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.proposalId !== BigInt(0)) {
       writer.uint32(8).uint64(message.proposalId);
@@ -1209,6 +1305,8 @@ export const Vote = {
     };
   }
 };
+GlobalDecoderRegistry.register(Vote.typeUrl, Vote);
+GlobalDecoderRegistry.registerAminoProtoMapping(Vote.aminoType, Vote.typeUrl);
 function createBaseDepositParams(): DepositParams {
   return {
     minDeposit: [],
@@ -1218,6 +1316,12 @@ function createBaseDepositParams(): DepositParams {
 export const DepositParams = {
   typeUrl: "/cosmos.gov.v1.DepositParams",
   aminoType: "cosmos-sdk/v1/DepositParams",
+  is(o: any): o is DepositParams {
+    return o && (o.$typeUrl === DepositParams.typeUrl || Array.isArray(o.minDeposit) && (!o.minDeposit.length || Coin.is(o.minDeposit[0])));
+  },
+  isAmino(o: any): o is DepositParamsAmino {
+    return o && (o.$typeUrl === DepositParams.typeUrl || Array.isArray(o.min_deposit) && (!o.min_deposit.length || Coin.isAmino(o.min_deposit[0])));
+  },
   encode(message: DepositParams, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     for (const v of message.minDeposit) {
       Coin.encode(v!, writer.uint32(10).fork()).ldelim();
@@ -1293,6 +1397,8 @@ export const DepositParams = {
     };
   }
 };
+GlobalDecoderRegistry.register(DepositParams.typeUrl, DepositParams);
+GlobalDecoderRegistry.registerAminoProtoMapping(DepositParams.aminoType, DepositParams.typeUrl);
 function createBaseVotingParams(): VotingParams {
   return {
     votingPeriod: undefined
@@ -1301,6 +1407,12 @@ function createBaseVotingParams(): VotingParams {
 export const VotingParams = {
   typeUrl: "/cosmos.gov.v1.VotingParams",
   aminoType: "cosmos-sdk/v1/VotingParams",
+  is(o: any): o is VotingParams {
+    return o && o.$typeUrl === VotingParams.typeUrl;
+  },
+  isAmino(o: any): o is VotingParamsAmino {
+    return o && o.$typeUrl === VotingParams.typeUrl;
+  },
   encode(message: VotingParams, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.votingPeriod !== undefined) {
       Duration.encode(message.votingPeriod, writer.uint32(10).fork()).ldelim();
@@ -1363,6 +1475,8 @@ export const VotingParams = {
     };
   }
 };
+GlobalDecoderRegistry.register(VotingParams.typeUrl, VotingParams);
+GlobalDecoderRegistry.registerAminoProtoMapping(VotingParams.aminoType, VotingParams.typeUrl);
 function createBaseTallyParams(): TallyParams {
   return {
     quorum: "",
@@ -1373,6 +1487,12 @@ function createBaseTallyParams(): TallyParams {
 export const TallyParams = {
   typeUrl: "/cosmos.gov.v1.TallyParams",
   aminoType: "cosmos-sdk/v1/TallyParams",
+  is(o: any): o is TallyParams {
+    return o && (o.$typeUrl === TallyParams.typeUrl || typeof o.quorum === "string" && typeof o.threshold === "string" && typeof o.vetoThreshold === "string");
+  },
+  isAmino(o: any): o is TallyParamsAmino {
+    return o && (o.$typeUrl === TallyParams.typeUrl || typeof o.quorum === "string" && typeof o.threshold === "string" && typeof o.veto_threshold === "string");
+  },
   encode(message: TallyParams, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.quorum !== "") {
       writer.uint32(10).string(message.quorum);
@@ -1457,6 +1577,8 @@ export const TallyParams = {
     };
   }
 };
+GlobalDecoderRegistry.register(TallyParams.typeUrl, TallyParams);
+GlobalDecoderRegistry.registerAminoProtoMapping(TallyParams.aminoType, TallyParams.typeUrl);
 function createBaseParams(): Params {
   return {
     minDeposit: [],
@@ -1466,14 +1588,26 @@ function createBaseParams(): Params {
     threshold: "",
     vetoThreshold: "",
     minInitialDepositRatio: "",
+    proposalCancelRatio: "",
+    proposalCancelDest: "",
+    expeditedVotingPeriod: undefined,
+    expeditedThreshold: "",
+    expeditedMinDeposit: [],
     burnVoteQuorum: false,
     burnProposalDepositPrevote: false,
-    burnVoteVeto: false
+    burnVoteVeto: false,
+    minDepositRatio: ""
   };
 }
 export const Params = {
   typeUrl: "/cosmos.gov.v1.Params",
   aminoType: "cosmos-sdk/v1/Params",
+  is(o: any): o is Params {
+    return o && (o.$typeUrl === Params.typeUrl || Array.isArray(o.minDeposit) && (!o.minDeposit.length || Coin.is(o.minDeposit[0])) && typeof o.quorum === "string" && typeof o.threshold === "string" && typeof o.vetoThreshold === "string" && typeof o.minInitialDepositRatio === "string" && typeof o.proposalCancelRatio === "string" && typeof o.proposalCancelDest === "string" && typeof o.expeditedThreshold === "string" && Array.isArray(o.expeditedMinDeposit) && (!o.expeditedMinDeposit.length || Coin.is(o.expeditedMinDeposit[0])) && typeof o.burnVoteQuorum === "boolean" && typeof o.burnProposalDepositPrevote === "boolean" && typeof o.burnVoteVeto === "boolean" && typeof o.minDepositRatio === "string");
+  },
+  isAmino(o: any): o is ParamsAmino {
+    return o && (o.$typeUrl === Params.typeUrl || Array.isArray(o.min_deposit) && (!o.min_deposit.length || Coin.isAmino(o.min_deposit[0])) && typeof o.quorum === "string" && typeof o.threshold === "string" && typeof o.veto_threshold === "string" && typeof o.min_initial_deposit_ratio === "string" && typeof o.proposal_cancel_ratio === "string" && typeof o.proposal_cancel_dest === "string" && typeof o.expedited_threshold === "string" && Array.isArray(o.expedited_min_deposit) && (!o.expedited_min_deposit.length || Coin.isAmino(o.expedited_min_deposit[0])) && typeof o.burn_vote_quorum === "boolean" && typeof o.burn_proposal_deposit_prevote === "boolean" && typeof o.burn_vote_veto === "boolean" && typeof o.min_deposit_ratio === "string");
+  },
   encode(message: Params, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     for (const v of message.minDeposit) {
       Coin.encode(v!, writer.uint32(10).fork()).ldelim();
@@ -1496,6 +1630,21 @@ export const Params = {
     if (message.minInitialDepositRatio !== "") {
       writer.uint32(58).string(message.minInitialDepositRatio);
     }
+    if (message.proposalCancelRatio !== "") {
+      writer.uint32(66).string(message.proposalCancelRatio);
+    }
+    if (message.proposalCancelDest !== "") {
+      writer.uint32(74).string(message.proposalCancelDest);
+    }
+    if (message.expeditedVotingPeriod !== undefined) {
+      Duration.encode(message.expeditedVotingPeriod, writer.uint32(82).fork()).ldelim();
+    }
+    if (message.expeditedThreshold !== "") {
+      writer.uint32(90).string(message.expeditedThreshold);
+    }
+    for (const v of message.expeditedMinDeposit) {
+      Coin.encode(v!, writer.uint32(98).fork()).ldelim();
+    }
     if (message.burnVoteQuorum === true) {
       writer.uint32(104).bool(message.burnVoteQuorum);
     }
@@ -1504,6 +1653,9 @@ export const Params = {
     }
     if (message.burnVoteVeto === true) {
       writer.uint32(120).bool(message.burnVoteVeto);
+    }
+    if (message.minDepositRatio !== "") {
+      writer.uint32(130).string(message.minDepositRatio);
     }
     return writer;
   },
@@ -1535,6 +1687,21 @@ export const Params = {
         case 7:
           message.minInitialDepositRatio = reader.string();
           break;
+        case 8:
+          message.proposalCancelRatio = reader.string();
+          break;
+        case 9:
+          message.proposalCancelDest = reader.string();
+          break;
+        case 10:
+          message.expeditedVotingPeriod = Duration.decode(reader, reader.uint32());
+          break;
+        case 11:
+          message.expeditedThreshold = reader.string();
+          break;
+        case 12:
+          message.expeditedMinDeposit.push(Coin.decode(reader, reader.uint32()));
+          break;
         case 13:
           message.burnVoteQuorum = reader.bool();
           break;
@@ -1543,6 +1710,9 @@ export const Params = {
           break;
         case 15:
           message.burnVoteVeto = reader.bool();
+          break;
+        case 16:
+          message.minDepositRatio = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -1560,9 +1730,15 @@ export const Params = {
     message.threshold = object.threshold ?? "";
     message.vetoThreshold = object.vetoThreshold ?? "";
     message.minInitialDepositRatio = object.minInitialDepositRatio ?? "";
+    message.proposalCancelRatio = object.proposalCancelRatio ?? "";
+    message.proposalCancelDest = object.proposalCancelDest ?? "";
+    message.expeditedVotingPeriod = object.expeditedVotingPeriod !== undefined && object.expeditedVotingPeriod !== null ? Duration.fromPartial(object.expeditedVotingPeriod) : undefined;
+    message.expeditedThreshold = object.expeditedThreshold ?? "";
+    message.expeditedMinDeposit = object.expeditedMinDeposit?.map(e => Coin.fromPartial(e)) || [];
     message.burnVoteQuorum = object.burnVoteQuorum ?? false;
     message.burnProposalDepositPrevote = object.burnProposalDepositPrevote ?? false;
     message.burnVoteVeto = object.burnVoteVeto ?? false;
+    message.minDepositRatio = object.minDepositRatio ?? "";
     return message;
   },
   fromAmino(object: ParamsAmino): Params {
@@ -1586,6 +1762,19 @@ export const Params = {
     if (object.min_initial_deposit_ratio !== undefined && object.min_initial_deposit_ratio !== null) {
       message.minInitialDepositRatio = object.min_initial_deposit_ratio;
     }
+    if (object.proposal_cancel_ratio !== undefined && object.proposal_cancel_ratio !== null) {
+      message.proposalCancelRatio = object.proposal_cancel_ratio;
+    }
+    if (object.proposal_cancel_dest !== undefined && object.proposal_cancel_dest !== null) {
+      message.proposalCancelDest = object.proposal_cancel_dest;
+    }
+    if (object.expedited_voting_period !== undefined && object.expedited_voting_period !== null) {
+      message.expeditedVotingPeriod = Duration.fromAmino(object.expedited_voting_period);
+    }
+    if (object.expedited_threshold !== undefined && object.expedited_threshold !== null) {
+      message.expeditedThreshold = object.expedited_threshold;
+    }
+    message.expeditedMinDeposit = object.expedited_min_deposit?.map(e => Coin.fromAmino(e)) || [];
     if (object.burn_vote_quorum !== undefined && object.burn_vote_quorum !== null) {
       message.burnVoteQuorum = object.burn_vote_quorum;
     }
@@ -1594,6 +1783,9 @@ export const Params = {
     }
     if (object.burn_vote_veto !== undefined && object.burn_vote_veto !== null) {
       message.burnVoteVeto = object.burn_vote_veto;
+    }
+    if (object.min_deposit_ratio !== undefined && object.min_deposit_ratio !== null) {
+      message.minDepositRatio = object.min_deposit_ratio;
     }
     return message;
   },
@@ -1610,9 +1802,19 @@ export const Params = {
     obj.threshold = message.threshold === "" ? undefined : message.threshold;
     obj.veto_threshold = message.vetoThreshold === "" ? undefined : message.vetoThreshold;
     obj.min_initial_deposit_ratio = message.minInitialDepositRatio === "" ? undefined : message.minInitialDepositRatio;
+    obj.proposal_cancel_ratio = message.proposalCancelRatio === "" ? undefined : message.proposalCancelRatio;
+    obj.proposal_cancel_dest = message.proposalCancelDest === "" ? undefined : message.proposalCancelDest;
+    obj.expedited_voting_period = message.expeditedVotingPeriod ? Duration.toAmino(message.expeditedVotingPeriod) : undefined;
+    obj.expedited_threshold = message.expeditedThreshold === "" ? undefined : message.expeditedThreshold;
+    if (message.expeditedMinDeposit) {
+      obj.expedited_min_deposit = message.expeditedMinDeposit.map(e => e ? Coin.toAmino(e) : undefined);
+    } else {
+      obj.expedited_min_deposit = message.expeditedMinDeposit;
+    }
     obj.burn_vote_quorum = message.burnVoteQuorum === false ? undefined : message.burnVoteQuorum;
     obj.burn_proposal_deposit_prevote = message.burnProposalDepositPrevote === false ? undefined : message.burnProposalDepositPrevote;
     obj.burn_vote_veto = message.burnVoteVeto === false ? undefined : message.burnVoteVeto;
+    obj.min_deposit_ratio = message.minDepositRatio === "" ? undefined : message.minDepositRatio;
     return obj;
   },
   fromAminoMsg(object: ParamsAminoMsg): Params {
@@ -1637,3 +1839,5 @@ export const Params = {
     };
   }
 };
+GlobalDecoderRegistry.register(Params.typeUrl, Params);
+GlobalDecoderRegistry.registerAminoProtoMapping(Params.aminoType, Params.typeUrl);

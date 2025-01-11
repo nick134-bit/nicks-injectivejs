@@ -1,5 +1,6 @@
 import { BinaryReader, BinaryWriter } from "../../../binary";
 import { DeepPartial } from "../../../helpers";
+import { GlobalDecoderRegistry } from "../../../registry";
 /**
  * Coin defines a token with a denomination and an amount.
  * 
@@ -21,22 +22,12 @@ export interface CoinProtoMsg {
  * signatures required by gogoproto.
  */
 export interface CoinAmino {
-  denom?: string;
+  denom: string;
   amount: string;
 }
 export interface CoinAminoMsg {
   type: "cosmos-sdk/Coin";
   value: CoinAmino;
-}
-/**
- * Coin defines a token with a denomination and an amount.
- * 
- * NOTE: The amount field is an Int which implements the custom method
- * signatures required by gogoproto.
- */
-export interface CoinSDKType {
-  denom: string;
-  amount: string;
 }
 /**
  * DecCoin defines a token with a denomination and a decimal amount.
@@ -59,24 +50,17 @@ export interface DecCoinProtoMsg {
  * signatures required by gogoproto.
  */
 export interface DecCoinAmino {
-  denom?: string;
-  amount?: string;
+  denom: string;
+  amount: string;
 }
 export interface DecCoinAminoMsg {
   type: "cosmos-sdk/DecCoin";
   value: DecCoinAmino;
 }
 /**
- * DecCoin defines a token with a denomination and a decimal amount.
- * 
- * NOTE: The amount field is an Dec which implements the custom method
- * signatures required by gogoproto.
+ * IntProto defines a Protobuf wrapper around an Int object.
+ * Deprecated: Prefer to use math.Int directly. It supports binary Marshal and Unmarshal.
  */
-export interface DecCoinSDKType {
-  denom: string;
-  amount: string;
-}
-/** IntProto defines a Protobuf wrapper around an Int object. */
 export interface IntProto {
   int: string;
 }
@@ -84,19 +68,21 @@ export interface IntProtoProtoMsg {
   typeUrl: "/cosmos.base.v1beta1.IntProto";
   value: Uint8Array;
 }
-/** IntProto defines a Protobuf wrapper around an Int object. */
+/**
+ * IntProto defines a Protobuf wrapper around an Int object.
+ * Deprecated: Prefer to use math.Int directly. It supports binary Marshal and Unmarshal.
+ */
 export interface IntProtoAmino {
-  int?: string;
+  int: string;
 }
 export interface IntProtoAminoMsg {
   type: "cosmos-sdk/IntProto";
   value: IntProtoAmino;
 }
-/** IntProto defines a Protobuf wrapper around an Int object. */
-export interface IntProtoSDKType {
-  int: string;
-}
-/** DecProto defines a Protobuf wrapper around a Dec object. */
+/**
+ * DecProto defines a Protobuf wrapper around a Dec object.
+ * Deprecated: Prefer to use math.LegacyDec directly. It supports binary Marshal and Unmarshal.
+ */
 export interface DecProto {
   dec: string;
 }
@@ -104,17 +90,16 @@ export interface DecProtoProtoMsg {
   typeUrl: "/cosmos.base.v1beta1.DecProto";
   value: Uint8Array;
 }
-/** DecProto defines a Protobuf wrapper around a Dec object. */
+/**
+ * DecProto defines a Protobuf wrapper around a Dec object.
+ * Deprecated: Prefer to use math.LegacyDec directly. It supports binary Marshal and Unmarshal.
+ */
 export interface DecProtoAmino {
-  dec?: string;
+  dec: string;
 }
 export interface DecProtoAminoMsg {
   type: "cosmos-sdk/DecProto";
   value: DecProtoAmino;
-}
-/** DecProto defines a Protobuf wrapper around a Dec object. */
-export interface DecProtoSDKType {
-  dec: string;
 }
 function createBaseCoin(): Coin {
   return {
@@ -125,6 +110,12 @@ function createBaseCoin(): Coin {
 export const Coin = {
   typeUrl: "/cosmos.base.v1beta1.Coin",
   aminoType: "cosmos-sdk/Coin",
+  is(o: any): o is Coin {
+    return o && (o.$typeUrl === Coin.typeUrl || typeof o.denom === "string" && typeof o.amount === "string");
+  },
+  isAmino(o: any): o is CoinAmino {
+    return o && (o.$typeUrl === Coin.typeUrl || typeof o.denom === "string" && typeof o.amount === "string");
+  },
   encode(message: Coin, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.denom !== "") {
       writer.uint32(10).string(message.denom);
@@ -198,6 +189,8 @@ export const Coin = {
     };
   }
 };
+GlobalDecoderRegistry.register(Coin.typeUrl, Coin);
+GlobalDecoderRegistry.registerAminoProtoMapping(Coin.aminoType, Coin.typeUrl);
 function createBaseDecCoin(): DecCoin {
   return {
     denom: "",
@@ -207,6 +200,12 @@ function createBaseDecCoin(): DecCoin {
 export const DecCoin = {
   typeUrl: "/cosmos.base.v1beta1.DecCoin",
   aminoType: "cosmos-sdk/DecCoin",
+  is(o: any): o is DecCoin {
+    return o && (o.$typeUrl === DecCoin.typeUrl || typeof o.denom === "string" && typeof o.amount === "string");
+  },
+  isAmino(o: any): o is DecCoinAmino {
+    return o && (o.$typeUrl === DecCoin.typeUrl || typeof o.denom === "string" && typeof o.amount === "string");
+  },
   encode(message: DecCoin, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.denom !== "") {
       writer.uint32(10).string(message.denom);
@@ -280,6 +279,8 @@ export const DecCoin = {
     };
   }
 };
+GlobalDecoderRegistry.register(DecCoin.typeUrl, DecCoin);
+GlobalDecoderRegistry.registerAminoProtoMapping(DecCoin.aminoType, DecCoin.typeUrl);
 function createBaseIntProto(): IntProto {
   return {
     int: ""
@@ -288,6 +289,12 @@ function createBaseIntProto(): IntProto {
 export const IntProto = {
   typeUrl: "/cosmos.base.v1beta1.IntProto",
   aminoType: "cosmos-sdk/IntProto",
+  is(o: any): o is IntProto {
+    return o && (o.$typeUrl === IntProto.typeUrl || typeof o.int === "string");
+  },
+  isAmino(o: any): o is IntProtoAmino {
+    return o && (o.$typeUrl === IntProto.typeUrl || typeof o.int === "string");
+  },
   encode(message: IntProto, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.int !== "") {
       writer.uint32(10).string(message.int);
@@ -350,6 +357,8 @@ export const IntProto = {
     };
   }
 };
+GlobalDecoderRegistry.register(IntProto.typeUrl, IntProto);
+GlobalDecoderRegistry.registerAminoProtoMapping(IntProto.aminoType, IntProto.typeUrl);
 function createBaseDecProto(): DecProto {
   return {
     dec: ""
@@ -358,6 +367,12 @@ function createBaseDecProto(): DecProto {
 export const DecProto = {
   typeUrl: "/cosmos.base.v1beta1.DecProto",
   aminoType: "cosmos-sdk/DecProto",
+  is(o: any): o is DecProto {
+    return o && (o.$typeUrl === DecProto.typeUrl || typeof o.dec === "string");
+  },
+  isAmino(o: any): o is DecProtoAmino {
+    return o && (o.$typeUrl === DecProto.typeUrl || typeof o.dec === "string");
+  },
   encode(message: DecProto, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.dec !== "") {
       writer.uint32(10).string(message.dec);
@@ -420,3 +435,5 @@ export const DecProto = {
     };
   }
 };
+GlobalDecoderRegistry.register(DecProto.typeUrl, DecProto);
+GlobalDecoderRegistry.registerAminoProtoMapping(DecProto.aminoType, DecProto.typeUrl);

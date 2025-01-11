@@ -1,5 +1,6 @@
 import { BinaryReader, BinaryWriter } from "../../binary";
 import { DeepPartial, bytesFromBase64, base64FromBytes } from "../../helpers";
+import { GlobalDecoderRegistry } from "../../registry";
 /** PublicKey defines the keys available for use with Validators */
 export interface PublicKey {
   ed25519?: Uint8Array;
@@ -18,11 +19,6 @@ export interface PublicKeyAminoMsg {
   type: "/tendermint.crypto.PublicKey";
   value: PublicKeyAmino;
 }
-/** PublicKey defines the keys available for use with Validators */
-export interface PublicKeySDKType {
-  ed25519?: Uint8Array;
-  secp256k1?: Uint8Array;
-}
 function createBasePublicKey(): PublicKey {
   return {
     ed25519: undefined,
@@ -31,6 +27,12 @@ function createBasePublicKey(): PublicKey {
 }
 export const PublicKey = {
   typeUrl: "/tendermint.crypto.PublicKey",
+  is(o: any): o is PublicKey {
+    return o && o.$typeUrl === PublicKey.typeUrl;
+  },
+  isAmino(o: any): o is PublicKeyAmino {
+    return o && o.$typeUrl === PublicKey.typeUrl;
+  },
   encode(message: PublicKey, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.ed25519 !== undefined) {
       writer.uint32(10).bytes(message.ed25519);
@@ -98,3 +100,4 @@ export const PublicKey = {
     };
   }
 };
+GlobalDecoderRegistry.register(PublicKey.typeUrl, PublicKey);

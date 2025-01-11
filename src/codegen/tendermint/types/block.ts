@@ -1,7 +1,8 @@
-import { Header, HeaderAmino, HeaderSDKType, Data, DataAmino, DataSDKType, Commit, CommitAmino, CommitSDKType } from "./types";
-import { EvidenceList, EvidenceListAmino, EvidenceListSDKType } from "./evidence";
+import { Header, HeaderAmino, Data, DataAmino, Commit, CommitAmino } from "./types";
+import { EvidenceList, EvidenceListAmino } from "./evidence";
 import { BinaryReader, BinaryWriter } from "../../binary";
 import { DeepPartial } from "../../helpers";
+import { GlobalDecoderRegistry } from "../../registry";
 export interface Block {
   header: Header;
   data: Data;
@@ -13,20 +14,14 @@ export interface BlockProtoMsg {
   value: Uint8Array;
 }
 export interface BlockAmino {
-  header?: HeaderAmino;
-  data?: DataAmino;
-  evidence?: EvidenceListAmino;
+  header: HeaderAmino;
+  data: DataAmino;
+  evidence: EvidenceListAmino;
   last_commit?: CommitAmino;
 }
 export interface BlockAminoMsg {
   type: "/tendermint.types.Block";
   value: BlockAmino;
-}
-export interface BlockSDKType {
-  header: HeaderSDKType;
-  data: DataSDKType;
-  evidence: EvidenceListSDKType;
-  last_commit?: CommitSDKType;
 }
 function createBaseBlock(): Block {
   return {
@@ -38,6 +33,12 @@ function createBaseBlock(): Block {
 }
 export const Block = {
   typeUrl: "/tendermint.types.Block",
+  is(o: any): o is Block {
+    return o && (o.$typeUrl === Block.typeUrl || Header.is(o.header) && Data.is(o.data) && EvidenceList.is(o.evidence));
+  },
+  isAmino(o: any): o is BlockAmino {
+    return o && (o.$typeUrl === Block.typeUrl || Header.isAmino(o.header) && Data.isAmino(o.data) && EvidenceList.isAmino(o.evidence));
+  },
   encode(message: Block, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.header !== undefined) {
       Header.encode(message.header, writer.uint32(10).fork()).ldelim();
@@ -127,3 +128,4 @@ export const Block = {
     };
   }
 };
+GlobalDecoderRegistry.register(Block.typeUrl, Block);

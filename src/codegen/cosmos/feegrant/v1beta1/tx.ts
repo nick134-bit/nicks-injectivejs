@@ -1,7 +1,7 @@
-import { Any, AnyProtoMsg, AnyAmino, AnySDKType } from "../../../google/protobuf/any";
-import { BasicAllowance, BasicAllowanceProtoMsg, BasicAllowanceSDKType, PeriodicAllowance, PeriodicAllowanceProtoMsg, PeriodicAllowanceSDKType, AllowedMsgAllowance, AllowedMsgAllowanceProtoMsg, AllowedMsgAllowanceSDKType } from "./feegrant";
+import { Any, AnyProtoMsg, AnyAmino } from "../../../google/protobuf/any";
 import { BinaryReader, BinaryWriter } from "../../../binary";
 import { DeepPartial } from "../../../helpers";
+import { GlobalDecoderRegistry } from "../../../registry";
 /**
  * MsgGrantAllowance adds permission for Grantee to spend up to Allowance
  * of fees from the account of Granter.
@@ -12,14 +12,14 @@ export interface MsgGrantAllowance {
   /** grantee is the address of the user being granted an allowance of another user's funds. */
   grantee: string;
   /** allowance can be any of basic, periodic, allowed fee allowance. */
-  allowance?: BasicAllowance | PeriodicAllowance | AllowedMsgAllowance | Any | undefined;
+  allowance?: Any | undefined;
 }
 export interface MsgGrantAllowanceProtoMsg {
   typeUrl: "/cosmos.feegrant.v1beta1.MsgGrantAllowance";
   value: Uint8Array;
 }
 export type MsgGrantAllowanceEncoded = Omit<MsgGrantAllowance, "allowance"> & {
-  /** allowance can be any of basic, periodic, allowed fee allowance. */allowance?: BasicAllowanceProtoMsg | PeriodicAllowanceProtoMsg | AllowedMsgAllowanceProtoMsg | AnyProtoMsg | undefined;
+  /** allowance can be any of basic, periodic, allowed fee allowance. */allowance?: AnyProtoMsg | undefined;
 };
 /**
  * MsgGrantAllowance adds permission for Grantee to spend up to Allowance
@@ -27,24 +27,15 @@ export type MsgGrantAllowanceEncoded = Omit<MsgGrantAllowance, "allowance"> & {
  */
 export interface MsgGrantAllowanceAmino {
   /** granter is the address of the user granting an allowance of their funds. */
-  granter?: string;
+  granter: string;
   /** grantee is the address of the user being granted an allowance of another user's funds. */
-  grantee?: string;
+  grantee: string;
   /** allowance can be any of basic, periodic, allowed fee allowance. */
   allowance?: AnyAmino;
 }
 export interface MsgGrantAllowanceAminoMsg {
   type: "cosmos-sdk/MsgGrantAllowance";
   value: MsgGrantAllowanceAmino;
-}
-/**
- * MsgGrantAllowance adds permission for Grantee to spend up to Allowance
- * of fees from the account of Granter.
- */
-export interface MsgGrantAllowanceSDKType {
-  granter: string;
-  grantee: string;
-  allowance?: BasicAllowanceSDKType | PeriodicAllowanceSDKType | AllowedMsgAllowanceSDKType | AnySDKType | undefined;
 }
 /** MsgGrantAllowanceResponse defines the Msg/GrantAllowanceResponse response type. */
 export interface MsgGrantAllowanceResponse {}
@@ -58,8 +49,6 @@ export interface MsgGrantAllowanceResponseAminoMsg {
   type: "cosmos-sdk/MsgGrantAllowanceResponse";
   value: MsgGrantAllowanceResponseAmino;
 }
-/** MsgGrantAllowanceResponse defines the Msg/GrantAllowanceResponse response type. */
-export interface MsgGrantAllowanceResponseSDKType {}
 /** MsgRevokeAllowance removes any existing Allowance from Granter to Grantee. */
 export interface MsgRevokeAllowance {
   /** granter is the address of the user granting an allowance of their funds. */
@@ -74,18 +63,13 @@ export interface MsgRevokeAllowanceProtoMsg {
 /** MsgRevokeAllowance removes any existing Allowance from Granter to Grantee. */
 export interface MsgRevokeAllowanceAmino {
   /** granter is the address of the user granting an allowance of their funds. */
-  granter?: string;
+  granter: string;
   /** grantee is the address of the user being granted an allowance of another user's funds. */
-  grantee?: string;
+  grantee: string;
 }
 export interface MsgRevokeAllowanceAminoMsg {
   type: "cosmos-sdk/MsgRevokeAllowance";
   value: MsgRevokeAllowanceAmino;
-}
-/** MsgRevokeAllowance removes any existing Allowance from Granter to Grantee. */
-export interface MsgRevokeAllowanceSDKType {
-  granter: string;
-  grantee: string;
 }
 /** MsgRevokeAllowanceResponse defines the Msg/RevokeAllowanceResponse response type. */
 export interface MsgRevokeAllowanceResponse {}
@@ -99,8 +83,52 @@ export interface MsgRevokeAllowanceResponseAminoMsg {
   type: "cosmos-sdk/MsgRevokeAllowanceResponse";
   value: MsgRevokeAllowanceResponseAmino;
 }
-/** MsgRevokeAllowanceResponse defines the Msg/RevokeAllowanceResponse response type. */
-export interface MsgRevokeAllowanceResponseSDKType {}
+/**
+ * MsgPruneAllowances prunes expired fee allowances.
+ * 
+ * Since cosmos-sdk 0.50
+ */
+export interface MsgPruneAllowances {
+  /** pruner is the address of the user pruning expired allowances. */
+  pruner: string;
+}
+export interface MsgPruneAllowancesProtoMsg {
+  typeUrl: "/cosmos.feegrant.v1beta1.MsgPruneAllowances";
+  value: Uint8Array;
+}
+/**
+ * MsgPruneAllowances prunes expired fee allowances.
+ * 
+ * Since cosmos-sdk 0.50
+ */
+export interface MsgPruneAllowancesAmino {
+  /** pruner is the address of the user pruning expired allowances. */
+  pruner: string;
+}
+export interface MsgPruneAllowancesAminoMsg {
+  type: "cosmos-sdk/MsgPruneAllowances";
+  value: MsgPruneAllowancesAmino;
+}
+/**
+ * MsgPruneAllowancesResponse defines the Msg/PruneAllowancesResponse response type.
+ * 
+ * Since cosmos-sdk 0.50
+ */
+export interface MsgPruneAllowancesResponse {}
+export interface MsgPruneAllowancesResponseProtoMsg {
+  typeUrl: "/cosmos.feegrant.v1beta1.MsgPruneAllowancesResponse";
+  value: Uint8Array;
+}
+/**
+ * MsgPruneAllowancesResponse defines the Msg/PruneAllowancesResponse response type.
+ * 
+ * Since cosmos-sdk 0.50
+ */
+export interface MsgPruneAllowancesResponseAmino {}
+export interface MsgPruneAllowancesResponseAminoMsg {
+  type: "cosmos-sdk/MsgPruneAllowancesResponse";
+  value: MsgPruneAllowancesResponseAmino;
+}
 function createBaseMsgGrantAllowance(): MsgGrantAllowance {
   return {
     granter: "",
@@ -111,6 +139,12 @@ function createBaseMsgGrantAllowance(): MsgGrantAllowance {
 export const MsgGrantAllowance = {
   typeUrl: "/cosmos.feegrant.v1beta1.MsgGrantAllowance",
   aminoType: "cosmos-sdk/MsgGrantAllowance",
+  is(o: any): o is MsgGrantAllowance {
+    return o && (o.$typeUrl === MsgGrantAllowance.typeUrl || typeof o.granter === "string" && typeof o.grantee === "string");
+  },
+  isAmino(o: any): o is MsgGrantAllowanceAmino {
+    return o && (o.$typeUrl === MsgGrantAllowance.typeUrl || typeof o.granter === "string" && typeof o.grantee === "string");
+  },
   encode(message: MsgGrantAllowance, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.granter !== "") {
       writer.uint32(10).string(message.granter);
@@ -119,7 +153,7 @@ export const MsgGrantAllowance = {
       writer.uint32(18).string(message.grantee);
     }
     if (message.allowance !== undefined) {
-      Any.encode((message.allowance as Any), writer.uint32(26).fork()).ldelim();
+      Any.encode(GlobalDecoderRegistry.wrapAny(message.allowance), writer.uint32(26).fork()).ldelim();
     }
     return writer;
   },
@@ -137,7 +171,7 @@ export const MsgGrantAllowance = {
           message.grantee = reader.string();
           break;
         case 3:
-          message.allowance = (Cosmos_feegrantv1beta1FeeAllowanceI_InterfaceDecoder(reader) as Any);
+          message.allowance = GlobalDecoderRegistry.unwrapAny(reader);
           break;
         default:
           reader.skipType(tag & 7);
@@ -150,7 +184,7 @@ export const MsgGrantAllowance = {
     const message = createBaseMsgGrantAllowance();
     message.granter = object.granter ?? "";
     message.grantee = object.grantee ?? "";
-    message.allowance = object.allowance !== undefined && object.allowance !== null ? Any.fromPartial(object.allowance) : undefined;
+    message.allowance = object.allowance !== undefined && object.allowance !== null ? GlobalDecoderRegistry.fromPartial(object.allowance) : undefined;
     return message;
   },
   fromAmino(object: MsgGrantAllowanceAmino): MsgGrantAllowance {
@@ -162,7 +196,7 @@ export const MsgGrantAllowance = {
       message.grantee = object.grantee;
     }
     if (object.allowance !== undefined && object.allowance !== null) {
-      message.allowance = Cosmos_feegrantv1beta1FeeAllowanceI_FromAmino(object.allowance);
+      message.allowance = GlobalDecoderRegistry.fromAminoMsg(object.allowance);
     }
     return message;
   },
@@ -170,7 +204,7 @@ export const MsgGrantAllowance = {
     const obj: any = {};
     obj.granter = message.granter === "" ? undefined : message.granter;
     obj.grantee = message.grantee === "" ? undefined : message.grantee;
-    obj.allowance = message.allowance ? Cosmos_feegrantv1beta1FeeAllowanceI_ToAmino((message.allowance as Any)) : undefined;
+    obj.allowance = message.allowance ? GlobalDecoderRegistry.toAminoMsg(message.allowance) : undefined;
     return obj;
   },
   fromAminoMsg(object: MsgGrantAllowanceAminoMsg): MsgGrantAllowance {
@@ -195,12 +229,20 @@ export const MsgGrantAllowance = {
     };
   }
 };
+GlobalDecoderRegistry.register(MsgGrantAllowance.typeUrl, MsgGrantAllowance);
+GlobalDecoderRegistry.registerAminoProtoMapping(MsgGrantAllowance.aminoType, MsgGrantAllowance.typeUrl);
 function createBaseMsgGrantAllowanceResponse(): MsgGrantAllowanceResponse {
   return {};
 }
 export const MsgGrantAllowanceResponse = {
   typeUrl: "/cosmos.feegrant.v1beta1.MsgGrantAllowanceResponse",
   aminoType: "cosmos-sdk/MsgGrantAllowanceResponse",
+  is(o: any): o is MsgGrantAllowanceResponse {
+    return o && o.$typeUrl === MsgGrantAllowanceResponse.typeUrl;
+  },
+  isAmino(o: any): o is MsgGrantAllowanceResponseAmino {
+    return o && o.$typeUrl === MsgGrantAllowanceResponse.typeUrl;
+  },
   encode(_: MsgGrantAllowanceResponse, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     return writer;
   },
@@ -252,6 +294,8 @@ export const MsgGrantAllowanceResponse = {
     };
   }
 };
+GlobalDecoderRegistry.register(MsgGrantAllowanceResponse.typeUrl, MsgGrantAllowanceResponse);
+GlobalDecoderRegistry.registerAminoProtoMapping(MsgGrantAllowanceResponse.aminoType, MsgGrantAllowanceResponse.typeUrl);
 function createBaseMsgRevokeAllowance(): MsgRevokeAllowance {
   return {
     granter: "",
@@ -261,6 +305,12 @@ function createBaseMsgRevokeAllowance(): MsgRevokeAllowance {
 export const MsgRevokeAllowance = {
   typeUrl: "/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
   aminoType: "cosmos-sdk/MsgRevokeAllowance",
+  is(o: any): o is MsgRevokeAllowance {
+    return o && (o.$typeUrl === MsgRevokeAllowance.typeUrl || typeof o.granter === "string" && typeof o.grantee === "string");
+  },
+  isAmino(o: any): o is MsgRevokeAllowanceAmino {
+    return o && (o.$typeUrl === MsgRevokeAllowance.typeUrl || typeof o.granter === "string" && typeof o.grantee === "string");
+  },
   encode(message: MsgRevokeAllowance, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.granter !== "") {
       writer.uint32(10).string(message.granter);
@@ -334,12 +384,20 @@ export const MsgRevokeAllowance = {
     };
   }
 };
+GlobalDecoderRegistry.register(MsgRevokeAllowance.typeUrl, MsgRevokeAllowance);
+GlobalDecoderRegistry.registerAminoProtoMapping(MsgRevokeAllowance.aminoType, MsgRevokeAllowance.typeUrl);
 function createBaseMsgRevokeAllowanceResponse(): MsgRevokeAllowanceResponse {
   return {};
 }
 export const MsgRevokeAllowanceResponse = {
   typeUrl: "/cosmos.feegrant.v1beta1.MsgRevokeAllowanceResponse",
   aminoType: "cosmos-sdk/MsgRevokeAllowanceResponse",
+  is(o: any): o is MsgRevokeAllowanceResponse {
+    return o && o.$typeUrl === MsgRevokeAllowanceResponse.typeUrl;
+  },
+  isAmino(o: any): o is MsgRevokeAllowanceResponseAmino {
+    return o && o.$typeUrl === MsgRevokeAllowanceResponse.typeUrl;
+  },
   encode(_: MsgRevokeAllowanceResponse, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     return writer;
   },
@@ -391,59 +449,148 @@ export const MsgRevokeAllowanceResponse = {
     };
   }
 };
-export const Cosmos_feegrantv1beta1FeeAllowanceI_InterfaceDecoder = (input: BinaryReader | Uint8Array): BasicAllowance | PeriodicAllowance | AllowedMsgAllowance | Any => {
-  const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-  const data = Any.decode(reader, reader.uint32());
-  switch (data.typeUrl) {
-    case "/cosmos.feegrant.v1beta1.BasicAllowance":
-      return BasicAllowance.decode(data.value);
-    case "/cosmos.feegrant.v1beta1.PeriodicAllowance":
-      return PeriodicAllowance.decode(data.value);
-    case "/cosmos.feegrant.v1beta1.AllowedMsgAllowance":
-      return AllowedMsgAllowance.decode(data.value);
-    default:
-      return data;
+GlobalDecoderRegistry.register(MsgRevokeAllowanceResponse.typeUrl, MsgRevokeAllowanceResponse);
+GlobalDecoderRegistry.registerAminoProtoMapping(MsgRevokeAllowanceResponse.aminoType, MsgRevokeAllowanceResponse.typeUrl);
+function createBaseMsgPruneAllowances(): MsgPruneAllowances {
+  return {
+    pruner: ""
+  };
+}
+export const MsgPruneAllowances = {
+  typeUrl: "/cosmos.feegrant.v1beta1.MsgPruneAllowances",
+  aminoType: "cosmos-sdk/MsgPruneAllowances",
+  is(o: any): o is MsgPruneAllowances {
+    return o && (o.$typeUrl === MsgPruneAllowances.typeUrl || typeof o.pruner === "string");
+  },
+  isAmino(o: any): o is MsgPruneAllowancesAmino {
+    return o && (o.$typeUrl === MsgPruneAllowances.typeUrl || typeof o.pruner === "string");
+  },
+  encode(message: MsgPruneAllowances, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
+    if (message.pruner !== "") {
+      writer.uint32(10).string(message.pruner);
+    }
+    return writer;
+  },
+  decode(input: BinaryReader | Uint8Array, length?: number): MsgPruneAllowances {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgPruneAllowances();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.pruner = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+  fromPartial(object: DeepPartial<MsgPruneAllowances>): MsgPruneAllowances {
+    const message = createBaseMsgPruneAllowances();
+    message.pruner = object.pruner ?? "";
+    return message;
+  },
+  fromAmino(object: MsgPruneAllowancesAmino): MsgPruneAllowances {
+    const message = createBaseMsgPruneAllowances();
+    if (object.pruner !== undefined && object.pruner !== null) {
+      message.pruner = object.pruner;
+    }
+    return message;
+  },
+  toAmino(message: MsgPruneAllowances): MsgPruneAllowancesAmino {
+    const obj: any = {};
+    obj.pruner = message.pruner === "" ? undefined : message.pruner;
+    return obj;
+  },
+  fromAminoMsg(object: MsgPruneAllowancesAminoMsg): MsgPruneAllowances {
+    return MsgPruneAllowances.fromAmino(object.value);
+  },
+  toAminoMsg(message: MsgPruneAllowances): MsgPruneAllowancesAminoMsg {
+    return {
+      type: "cosmos-sdk/MsgPruneAllowances",
+      value: MsgPruneAllowances.toAmino(message)
+    };
+  },
+  fromProtoMsg(message: MsgPruneAllowancesProtoMsg): MsgPruneAllowances {
+    return MsgPruneAllowances.decode(message.value);
+  },
+  toProto(message: MsgPruneAllowances): Uint8Array {
+    return MsgPruneAllowances.encode(message).finish();
+  },
+  toProtoMsg(message: MsgPruneAllowances): MsgPruneAllowancesProtoMsg {
+    return {
+      typeUrl: "/cosmos.feegrant.v1beta1.MsgPruneAllowances",
+      value: MsgPruneAllowances.encode(message).finish()
+    };
   }
 };
-export const Cosmos_feegrantv1beta1FeeAllowanceI_FromAmino = (content: AnyAmino): Any => {
-  switch (content.type) {
-    case "cosmos-sdk/BasicAllowance":
-      return Any.fromPartial({
-        typeUrl: "/cosmos.feegrant.v1beta1.BasicAllowance",
-        value: BasicAllowance.encode(BasicAllowance.fromPartial(BasicAllowance.fromAmino(content.value))).finish()
-      });
-    case "cosmos-sdk/PeriodicAllowance":
-      return Any.fromPartial({
-        typeUrl: "/cosmos.feegrant.v1beta1.PeriodicAllowance",
-        value: PeriodicAllowance.encode(PeriodicAllowance.fromPartial(PeriodicAllowance.fromAmino(content.value))).finish()
-      });
-    case "cosmos-sdk/AllowedMsgAllowance":
-      return Any.fromPartial({
-        typeUrl: "/cosmos.feegrant.v1beta1.AllowedMsgAllowance",
-        value: AllowedMsgAllowance.encode(AllowedMsgAllowance.fromPartial(AllowedMsgAllowance.fromAmino(content.value))).finish()
-      });
-    default:
-      return Any.fromAmino(content);
+GlobalDecoderRegistry.register(MsgPruneAllowances.typeUrl, MsgPruneAllowances);
+GlobalDecoderRegistry.registerAminoProtoMapping(MsgPruneAllowances.aminoType, MsgPruneAllowances.typeUrl);
+function createBaseMsgPruneAllowancesResponse(): MsgPruneAllowancesResponse {
+  return {};
+}
+export const MsgPruneAllowancesResponse = {
+  typeUrl: "/cosmos.feegrant.v1beta1.MsgPruneAllowancesResponse",
+  aminoType: "cosmos-sdk/MsgPruneAllowancesResponse",
+  is(o: any): o is MsgPruneAllowancesResponse {
+    return o && o.$typeUrl === MsgPruneAllowancesResponse.typeUrl;
+  },
+  isAmino(o: any): o is MsgPruneAllowancesResponseAmino {
+    return o && o.$typeUrl === MsgPruneAllowancesResponse.typeUrl;
+  },
+  encode(_: MsgPruneAllowancesResponse, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
+    return writer;
+  },
+  decode(input: BinaryReader | Uint8Array, length?: number): MsgPruneAllowancesResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgPruneAllowancesResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+  fromPartial(_: DeepPartial<MsgPruneAllowancesResponse>): MsgPruneAllowancesResponse {
+    const message = createBaseMsgPruneAllowancesResponse();
+    return message;
+  },
+  fromAmino(_: MsgPruneAllowancesResponseAmino): MsgPruneAllowancesResponse {
+    const message = createBaseMsgPruneAllowancesResponse();
+    return message;
+  },
+  toAmino(_: MsgPruneAllowancesResponse): MsgPruneAllowancesResponseAmino {
+    const obj: any = {};
+    return obj;
+  },
+  fromAminoMsg(object: MsgPruneAllowancesResponseAminoMsg): MsgPruneAllowancesResponse {
+    return MsgPruneAllowancesResponse.fromAmino(object.value);
+  },
+  toAminoMsg(message: MsgPruneAllowancesResponse): MsgPruneAllowancesResponseAminoMsg {
+    return {
+      type: "cosmos-sdk/MsgPruneAllowancesResponse",
+      value: MsgPruneAllowancesResponse.toAmino(message)
+    };
+  },
+  fromProtoMsg(message: MsgPruneAllowancesResponseProtoMsg): MsgPruneAllowancesResponse {
+    return MsgPruneAllowancesResponse.decode(message.value);
+  },
+  toProto(message: MsgPruneAllowancesResponse): Uint8Array {
+    return MsgPruneAllowancesResponse.encode(message).finish();
+  },
+  toProtoMsg(message: MsgPruneAllowancesResponse): MsgPruneAllowancesResponseProtoMsg {
+    return {
+      typeUrl: "/cosmos.feegrant.v1beta1.MsgPruneAllowancesResponse",
+      value: MsgPruneAllowancesResponse.encode(message).finish()
+    };
   }
 };
-export const Cosmos_feegrantv1beta1FeeAllowanceI_ToAmino = (content: Any) => {
-  switch (content.typeUrl) {
-    case "/cosmos.feegrant.v1beta1.BasicAllowance":
-      return {
-        type: "cosmos-sdk/BasicAllowance",
-        value: BasicAllowance.toAmino(BasicAllowance.decode(content.value, undefined))
-      };
-    case "/cosmos.feegrant.v1beta1.PeriodicAllowance":
-      return {
-        type: "cosmos-sdk/PeriodicAllowance",
-        value: PeriodicAllowance.toAmino(PeriodicAllowance.decode(content.value, undefined))
-      };
-    case "/cosmos.feegrant.v1beta1.AllowedMsgAllowance":
-      return {
-        type: "cosmos-sdk/AllowedMsgAllowance",
-        value: AllowedMsgAllowance.toAmino(AllowedMsgAllowance.decode(content.value, undefined))
-      };
-    default:
-      return Any.toAmino(content);
-  }
-};
+GlobalDecoderRegistry.register(MsgPruneAllowancesResponse.typeUrl, MsgPruneAllowancesResponse);
+GlobalDecoderRegistry.registerAminoProtoMapping(MsgPruneAllowancesResponse.aminoType, MsgPruneAllowancesResponse.typeUrl);

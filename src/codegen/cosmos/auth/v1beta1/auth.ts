@@ -1,13 +1,13 @@
-import { Any, AnyAmino, AnySDKType } from "../../../google/protobuf/any";
+import { Any, AnyAmino } from "../../../google/protobuf/any";
 import { BinaryReader, BinaryWriter } from "../../../binary";
 import { DeepPartial, bytesFromBase64, base64FromBytes } from "../../../helpers";
+import { GlobalDecoderRegistry } from "../../../registry";
 /**
  * BaseAccount defines a base account type. It contains all the necessary fields
  * for basic account functionality. Any custom account type should extend this
  * type for additional functionality (e.g. vesting).
  */
 export interface BaseAccount {
-  $typeUrl?: "/cosmos.auth.v1beta1.BaseAccount";
   address: string;
   pubKey?: Any;
   accountNumber: bigint;
@@ -23,30 +23,17 @@ export interface BaseAccountProtoMsg {
  * type for additional functionality (e.g. vesting).
  */
 export interface BaseAccountAmino {
-  address?: string;
+  address: string;
   pub_key?: AnyAmino;
-  account_number?: string;
-  sequence?: string;
+  account_number: string;
+  sequence: string;
 }
 export interface BaseAccountAminoMsg {
   type: "cosmos-sdk/BaseAccount";
   value: BaseAccountAmino;
 }
-/**
- * BaseAccount defines a base account type. It contains all the necessary fields
- * for basic account functionality. Any custom account type should extend this
- * type for additional functionality (e.g. vesting).
- */
-export interface BaseAccountSDKType {
-  $typeUrl?: "/cosmos.auth.v1beta1.BaseAccount";
-  address: string;
-  pub_key?: AnySDKType;
-  account_number: bigint;
-  sequence: bigint;
-}
 /** ModuleAccount defines an account for modules that holds coins on a pool. */
 export interface ModuleAccount {
-  $typeUrl?: "/cosmos.auth.v1beta1.ModuleAccount";
   baseAccount?: BaseAccount;
   name: string;
   permissions: string[];
@@ -58,19 +45,12 @@ export interface ModuleAccountProtoMsg {
 /** ModuleAccount defines an account for modules that holds coins on a pool. */
 export interface ModuleAccountAmino {
   base_account?: BaseAccountAmino;
-  name?: string;
-  permissions?: string[];
+  name: string;
+  permissions: string[];
 }
 export interface ModuleAccountAminoMsg {
   type: "cosmos-sdk/ModuleAccount";
   value: ModuleAccountAmino;
-}
-/** ModuleAccount defines an account for modules that holds coins on a pool. */
-export interface ModuleAccountSDKType {
-  $typeUrl?: "/cosmos.auth.v1beta1.ModuleAccount";
-  base_account?: BaseAccountSDKType;
-  name: string;
-  permissions: string[];
 }
 /**
  * ModuleCredential represents a unclaimable pubkey for base accounts controlled by modules.
@@ -97,25 +77,16 @@ export interface ModuleCredentialProtoMsg {
  */
 export interface ModuleCredentialAmino {
   /** module_name is the name of the module used for address derivation (passed into address.Module). */
-  module_name?: string;
+  module_name: string;
   /**
    * derivation_keys is for deriving a module account address (passed into address.Module)
    * adding more keys creates sub-account addresses (passed into address.Derive)
    */
-  derivation_keys?: string[];
+  derivation_keys: string[];
 }
 export interface ModuleCredentialAminoMsg {
-  type: "cosmos-sdk/ModuleCredential";
+  type: "cosmos-sdk/GroupAccountCredential";
   value: ModuleCredentialAmino;
-}
-/**
- * ModuleCredential represents a unclaimable pubkey for base accounts controlled by modules.
- * 
- * Since: cosmos-sdk 0.47
- */
-export interface ModuleCredentialSDKType {
-  module_name: string;
-  derivation_keys: Uint8Array[];
 }
 /** Params defines the parameters for the auth module. */
 export interface Params {
@@ -131,27 +102,18 @@ export interface ParamsProtoMsg {
 }
 /** Params defines the parameters for the auth module. */
 export interface ParamsAmino {
-  max_memo_characters?: string;
-  tx_sig_limit?: string;
-  tx_size_cost_per_byte?: string;
-  sig_verify_cost_ed25519?: string;
-  sig_verify_cost_secp256k1?: string;
+  max_memo_characters: string;
+  tx_sig_limit: string;
+  tx_size_cost_per_byte: string;
+  sig_verify_cost_ed25519: string;
+  sig_verify_cost_secp256k1: string;
 }
 export interface ParamsAminoMsg {
   type: "cosmos-sdk/x/auth/Params";
   value: ParamsAmino;
 }
-/** Params defines the parameters for the auth module. */
-export interface ParamsSDKType {
-  max_memo_characters: bigint;
-  tx_sig_limit: bigint;
-  tx_size_cost_per_byte: bigint;
-  sig_verify_cost_ed25519: bigint;
-  sig_verify_cost_secp256k1: bigint;
-}
 function createBaseBaseAccount(): BaseAccount {
   return {
-    $typeUrl: "/cosmos.auth.v1beta1.BaseAccount",
     address: "",
     pubKey: undefined,
     accountNumber: BigInt(0),
@@ -161,6 +123,12 @@ function createBaseBaseAccount(): BaseAccount {
 export const BaseAccount = {
   typeUrl: "/cosmos.auth.v1beta1.BaseAccount",
   aminoType: "cosmos-sdk/BaseAccount",
+  is(o: any): o is BaseAccount {
+    return o && (o.$typeUrl === BaseAccount.typeUrl || typeof o.address === "string" && typeof o.accountNumber === "bigint" && typeof o.sequence === "bigint");
+  },
+  isAmino(o: any): o is BaseAccountAmino {
+    return o && (o.$typeUrl === BaseAccount.typeUrl || typeof o.address === "string" && typeof o.account_number === "bigint" && typeof o.sequence === "bigint");
+  },
   encode(message: BaseAccount, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.address !== "") {
       writer.uint32(10).string(message.address);
@@ -256,9 +224,10 @@ export const BaseAccount = {
     };
   }
 };
+GlobalDecoderRegistry.register(BaseAccount.typeUrl, BaseAccount);
+GlobalDecoderRegistry.registerAminoProtoMapping(BaseAccount.aminoType, BaseAccount.typeUrl);
 function createBaseModuleAccount(): ModuleAccount {
   return {
-    $typeUrl: "/cosmos.auth.v1beta1.ModuleAccount",
     baseAccount: undefined,
     name: "",
     permissions: []
@@ -267,6 +236,12 @@ function createBaseModuleAccount(): ModuleAccount {
 export const ModuleAccount = {
   typeUrl: "/cosmos.auth.v1beta1.ModuleAccount",
   aminoType: "cosmos-sdk/ModuleAccount",
+  is(o: any): o is ModuleAccount {
+    return o && (o.$typeUrl === ModuleAccount.typeUrl || typeof o.name === "string" && Array.isArray(o.permissions) && (!o.permissions.length || typeof o.permissions[0] === "string"));
+  },
+  isAmino(o: any): o is ModuleAccountAmino {
+    return o && (o.$typeUrl === ModuleAccount.typeUrl || typeof o.name === "string" && Array.isArray(o.permissions) && (!o.permissions.length || typeof o.permissions[0] === "string"));
+  },
   encode(message: ModuleAccount, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.baseAccount !== undefined) {
       BaseAccount.encode(message.baseAccount, writer.uint32(10).fork()).ldelim();
@@ -353,6 +328,8 @@ export const ModuleAccount = {
     };
   }
 };
+GlobalDecoderRegistry.register(ModuleAccount.typeUrl, ModuleAccount);
+GlobalDecoderRegistry.registerAminoProtoMapping(ModuleAccount.aminoType, ModuleAccount.typeUrl);
 function createBaseModuleCredential(): ModuleCredential {
   return {
     moduleName: "",
@@ -361,7 +338,13 @@ function createBaseModuleCredential(): ModuleCredential {
 }
 export const ModuleCredential = {
   typeUrl: "/cosmos.auth.v1beta1.ModuleCredential",
-  aminoType: "cosmos-sdk/ModuleCredential",
+  aminoType: "cosmos-sdk/GroupAccountCredential",
+  is(o: any): o is ModuleCredential {
+    return o && (o.$typeUrl === ModuleCredential.typeUrl || typeof o.moduleName === "string" && Array.isArray(o.derivationKeys) && (!o.derivationKeys.length || o.derivationKeys[0] instanceof Uint8Array || typeof o.derivationKeys[0] === "string"));
+  },
+  isAmino(o: any): o is ModuleCredentialAmino {
+    return o && (o.$typeUrl === ModuleCredential.typeUrl || typeof o.module_name === "string" && Array.isArray(o.derivation_keys) && (!o.derivation_keys.length || o.derivation_keys[0] instanceof Uint8Array || typeof o.derivation_keys[0] === "string"));
+  },
   encode(message: ModuleCredential, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.moduleName !== "") {
       writer.uint32(10).string(message.moduleName);
@@ -420,7 +403,7 @@ export const ModuleCredential = {
   },
   toAminoMsg(message: ModuleCredential): ModuleCredentialAminoMsg {
     return {
-      type: "cosmos-sdk/ModuleCredential",
+      type: "cosmos-sdk/GroupAccountCredential",
       value: ModuleCredential.toAmino(message)
     };
   },
@@ -437,6 +420,8 @@ export const ModuleCredential = {
     };
   }
 };
+GlobalDecoderRegistry.register(ModuleCredential.typeUrl, ModuleCredential);
+GlobalDecoderRegistry.registerAminoProtoMapping(ModuleCredential.aminoType, ModuleCredential.typeUrl);
 function createBaseParams(): Params {
   return {
     maxMemoCharacters: BigInt(0),
@@ -449,6 +434,12 @@ function createBaseParams(): Params {
 export const Params = {
   typeUrl: "/cosmos.auth.v1beta1.Params",
   aminoType: "cosmos-sdk/x/auth/Params",
+  is(o: any): o is Params {
+    return o && (o.$typeUrl === Params.typeUrl || typeof o.maxMemoCharacters === "bigint" && typeof o.txSigLimit === "bigint" && typeof o.txSizeCostPerByte === "bigint" && typeof o.sigVerifyCostEd25519 === "bigint" && typeof o.sigVerifyCostSecp256k1 === "bigint");
+  },
+  isAmino(o: any): o is ParamsAmino {
+    return o && (o.$typeUrl === Params.typeUrl || typeof o.max_memo_characters === "bigint" && typeof o.tx_sig_limit === "bigint" && typeof o.tx_size_cost_per_byte === "bigint" && typeof o.sig_verify_cost_ed25519 === "bigint" && typeof o.sig_verify_cost_secp256k1 === "bigint");
+  },
   encode(message: Params, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.maxMemoCharacters !== BigInt(0)) {
       writer.uint32(8).uint64(message.maxMemoCharacters);
@@ -555,3 +546,5 @@ export const Params = {
     };
   }
 };
+GlobalDecoderRegistry.register(Params.typeUrl, Params);
+GlobalDecoderRegistry.registerAminoProtoMapping(Params.aminoType, Params.typeUrl);

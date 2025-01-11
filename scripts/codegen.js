@@ -9,106 +9,81 @@ const protoDirs = [
 const outPath = join(__dirname, '/../src/codegen');
 rimraf(outPath);
 
+// using config from https://github.com/cosmology-tech/interchainjs by https://github.com/Zetazzz
+
 telescope({
   protoDirs,
   outPath,
   options: {
-    removeUnusedImports: true, // testing...
-    classesUseArrowFunctions: true,
-
-    tsDisable: {
-      patterns: ['**/tx.registry.ts'],
-      files: [
-        'cosmos/auth/v1beta1/query.ts',
-        'cosmos/authz/v1beta1/authz.ts',
-        'cosmos/gov/v1/tx.ts',
-        'cosmos/gov/v1beta1/gov.ts',
-        'cosmos/gov/v1beta1/tx.ts'
-      ]
-    },
-
-    prototypes: {
-      optionalQueryParams: true,
-      useOptionalNullable: true,
-      fieldDefaultIsOptional: true,
-
-      addTypeUrlToObjects: true,
-      addTypeUrlToDecoders: true,
-      addAminoTypeToObjects: true,
-
-      excluded: {
-        packages: [
-          'ibc.applications.fee.v1', // issue with parsing protos (LCD routes with nested objects in params)
-
-          // 'cosmos.auth.v1beta1',
-          'cosmos.app.v1alpha1',
-          'cosmos.app.v1beta1',
-          'cosmos.base.kv.v1beta1',
-          'cosmos.base.reflection.v1beta1',
-          'cosmos.base.snapshots.v1beta1',
-          'cosmos.base.store.v1beta1',
-          'cosmos.base.tendermint.v1beta1',
-          'cosmos.crisis.v1beta1',
-          'cosmos.evidence.v1beta1',
-          // "cosmos.feegrant.v1beta1",
-          'cosmos.genutil.v1beta1',
-          // "cosmos.group.v1beta1",
-
-          // 'cosmos.mint.v1beta1',
-
-          'cosmos.autocli.v1',
-
-          // "cosmos.group.v1",
-          'cosmos.msg.v1',
-          'cosmos.nft.v1beta1',
-          'cosmos.capability.v1beta1',
-          'cosmos.orm.v1alpha1',
-          'cosmos.orm.v1',
-          'cosmos.slashing.v1beta1',
-          // "cosmos.vesting.v1beta1",
-          'google.api',
-          'ibc.core.port.v1',
-          'ibc.core.types.v1'
-        ],
-        hardProtos: ['cosmos/accounts/v1/accounts.proto']
+    "classesUseArrowFunctions": true,
+    "env": "v-next",
+    "useSDKTypes": false,
+    "prototypes": {
+      "enableRegistryLoader": false,
+      "enableMessageComposer": true,
+      "enabled": true,
+      "parser": {
+        "keepCase": false
       },
-      parser: {
-        keepCase: false
+      "methods": {
+        "fromJSON": false,
+        "toJSON": false,
+        "encode": true,
+        "decode": true,
+        "fromPartial": true,
+        "toAmino": true,
+        "fromAmino": true,
+        "fromProto": false,
+        "toProto": false,
+        "fromProtoMsg": false,
+        "toProtoMsg": false,
+        "toAminoMsg": true,
+        "fromAminoMsg": true
       },
-      typingsFormat: {
-        useDeepPartial: true,
-        duration: 'duration',
-        timestamp: 'date',
-        useExact: false
+      "addTypeUrlToDecoders": false,
+      "addTypeUrlToObjects": true,
+      "addAminoTypeToObjects": true,
+      "typingsFormat": {
+        "duration": "duration",
+        "timestamp": "date",
+        "useExact": false,
+        "useDeepPartial": true,
+        "num64": "bigint",
+        "customTypes": {
+          "useCosmosSDKDec": false
+        },
+        "useTelescopeGeneratedType": true,
+        "autoFixUndefinedEnumDefault": true
       }
     },
-    interfaces: {
-      enabled: true,
-      useUnionTypes: true
+    "bundle": {
+      "enabled": true
     },
-    aminoEncoding: {
-      enabled: true,
-      useLegacyInlineEncoding: false
+    "stargateClients": {
+      "enabled": true
     },
-    lcdClients: {
-      enabled: false
+    "lcdClients": {
+      "enabled": false
     },
-    rpcClients: {
-      type: 'tendermint',
-      enabled: false,
-      camelCase: true,
-      useConnectComet: true
+    "rpcClients": {
+      "enabled": false
     },
-    packages: {
-      cosmos: {
-        authz: {
-          v1beta1: {
-            aminoEncoding: {
-              enabled: false
-            }
-          }
-        }
-      }
+    "helperFuncCreators": {
+      "enabled": true,
+      "useGlobalDecoderRegistry": true,
+      "genCustomHooks": false
+    },
+    "interfaces": {
+      "enabled": true,
+      "useGlobalDecoderRegistry": true,
+      "registerAllDecodersToGlobal": false,
+      "useUnionTypes": true
+    },
+    "aminoEncoding": {
+      "enabled": true,
+      "useLegacyInlineEncoding": false,
+      "disableMsgTypes": false,
+      "useProtoOptionality": true
     }
   }
 })

@@ -1,12 +1,6 @@
-//@ts-nocheck
-import { GeneratedType, Registry } from "@cosmjs/proto-signing";
-import { MsgSetWithdrawAddress, MsgWithdrawDelegatorReward, MsgWithdrawValidatorCommission, MsgFundCommunityPool, MsgUpdateParams, MsgCommunityPoolSpend } from "./tx";
-export const registry: ReadonlyArray<[string, GeneratedType]> = [["/cosmos.distribution.v1beta1.MsgSetWithdrawAddress", MsgSetWithdrawAddress], ["/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward", MsgWithdrawDelegatorReward], ["/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission", MsgWithdrawValidatorCommission], ["/cosmos.distribution.v1beta1.MsgFundCommunityPool", MsgFundCommunityPool], ["/cosmos.distribution.v1beta1.MsgUpdateParams", MsgUpdateParams], ["/cosmos.distribution.v1beta1.MsgCommunityPoolSpend", MsgCommunityPoolSpend]];
-export const load = (protoRegistry: Registry) => {
-  registry.forEach(([typeUrl, mod]) => {
-    protoRegistry.register(typeUrl, mod);
-  });
-};
+import { TelescopeGeneratedType } from "../../../types";
+import { MsgSetWithdrawAddress, MsgWithdrawDelegatorReward, MsgWithdrawValidatorCommission, MsgFundCommunityPool, MsgUpdateParams, MsgCommunityPoolSpend, MsgDepositValidatorRewardsPool } from "./tx";
+export const registry: ReadonlyArray<[string, TelescopeGeneratedType<any, any, any>]> = [["/cosmos.distribution.v1beta1.MsgSetWithdrawAddress", MsgSetWithdrawAddress], ["/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward", MsgWithdrawDelegatorReward], ["/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission", MsgWithdrawValidatorCommission], ["/cosmos.distribution.v1beta1.MsgFundCommunityPool", MsgFundCommunityPool], ["/cosmos.distribution.v1beta1.MsgUpdateParams", MsgUpdateParams], ["/cosmos.distribution.v1beta1.MsgCommunityPoolSpend", MsgCommunityPoolSpend], ["/cosmos.distribution.v1beta1.MsgDepositValidatorRewardsPool", MsgDepositValidatorRewardsPool]];
 export const MessageComposer = {
   encoded: {
     setWithdrawAddress(value: MsgSetWithdrawAddress) {
@@ -43,6 +37,12 @@ export const MessageComposer = {
       return {
         typeUrl: "/cosmos.distribution.v1beta1.MsgCommunityPoolSpend",
         value: MsgCommunityPoolSpend.encode(value).finish()
+      };
+    },
+    depositValidatorRewardsPool(value: MsgDepositValidatorRewardsPool) {
+      return {
+        typeUrl: "/cosmos.distribution.v1beta1.MsgDepositValidatorRewardsPool",
+        value: MsgDepositValidatorRewardsPool.encode(value).finish()
       };
     }
   },
@@ -82,6 +82,12 @@ export const MessageComposer = {
         typeUrl: "/cosmos.distribution.v1beta1.MsgCommunityPoolSpend",
         value
       };
+    },
+    depositValidatorRewardsPool(value: MsgDepositValidatorRewardsPool) {
+      return {
+        typeUrl: "/cosmos.distribution.v1beta1.MsgDepositValidatorRewardsPool",
+        value
+      };
     }
   },
   fromPartial: {
@@ -119,6 +125,12 @@ export const MessageComposer = {
       return {
         typeUrl: "/cosmos.distribution.v1beta1.MsgCommunityPoolSpend",
         value: MsgCommunityPoolSpend.fromPartial(value)
+      };
+    },
+    depositValidatorRewardsPool(value: MsgDepositValidatorRewardsPool) {
+      return {
+        typeUrl: "/cosmos.distribution.v1beta1.MsgDepositValidatorRewardsPool",
+        value: MsgDepositValidatorRewardsPool.fromPartial(value)
       };
     }
   }

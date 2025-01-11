@@ -1,8 +1,9 @@
-import { AccessConfig, AccessConfigAmino, AccessConfigSDKType } from "./types";
-import { Coin, CoinAmino, CoinSDKType } from "../../../cosmos/base/v1beta1/coin";
+import { AccessConfig, AccessConfigAmino } from "./types";
+import { Coin, CoinAmino } from "../../../cosmos/base/v1beta1/coin";
 import { BinaryReader, BinaryWriter } from "../../../binary";
 import { DeepPartial, bytesFromBase64, base64FromBytes } from "../../../helpers";
 import { fromBase64, toBase64, toUtf8, fromUtf8 } from "@cosmjs/encoding";
+import { GlobalDecoderRegistry } from "../../../registry";
 /**
  * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
  * an explicit StoreCodeProposal. To submit WASM code to the system,
@@ -11,7 +12,6 @@ import { fromBase64, toBase64, toUtf8, fromUtf8 } from "@cosmjs/encoding";
  */
 /** @deprecated */
 export interface StoreCodeProposal {
-  $typeUrl?: "/cosmwasm.wasm.v1.StoreCodeProposal";
   /** Title is a short summary */
   title: string;
   /** Description is a human readable text */
@@ -50,52 +50,33 @@ export interface StoreCodeProposalProtoMsg {
 /** @deprecated */
 export interface StoreCodeProposalAmino {
   /** Title is a short summary */
-  title?: string;
+  title: string;
   /** Description is a human readable text */
-  description?: string;
+  description: string;
   /** RunAs is the address that is passed to the contract's environment as sender */
-  run_as?: string;
+  run_as: string;
   /** WASMByteCode can be raw or gzip compressed */
-  wasm_byte_code?: string;
+  wasm_byte_code: string;
   /** InstantiatePermission to apply on contract creation, optional */
   instantiate_permission?: AccessConfigAmino;
   /** UnpinCode code on upload, optional */
-  unpin_code?: boolean;
+  unpin_code: boolean;
   /** Source is the URL where the code is hosted */
-  source?: string;
+  source: string;
   /**
    * Builder is the docker image used to build the code deterministically, used
    * for smart contract verification
    */
-  builder?: string;
+  builder: string;
   /**
    * CodeHash is the SHA256 sum of the code outputted by builder, used for smart
    * contract verification
    */
-  code_hash?: string;
+  code_hash: string;
 }
 export interface StoreCodeProposalAminoMsg {
   type: "wasm/StoreCodeProposal";
   value: StoreCodeProposalAmino;
-}
-/**
- * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
- * an explicit StoreCodeProposal. To submit WASM code to the system,
- * a simple MsgStoreCode can be invoked from the x/gov module via
- * a v1 governance proposal.
- */
-/** @deprecated */
-export interface StoreCodeProposalSDKType {
-  $typeUrl?: "/cosmwasm.wasm.v1.StoreCodeProposal";
-  title: string;
-  description: string;
-  run_as: string;
-  wasm_byte_code: Uint8Array;
-  instantiate_permission?: AccessConfigSDKType;
-  unpin_code: boolean;
-  source: string;
-  builder: string;
-  code_hash: Uint8Array;
 }
 /**
  * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
@@ -105,7 +86,6 @@ export interface StoreCodeProposalSDKType {
  */
 /** @deprecated */
 export interface InstantiateContractProposal {
-  $typeUrl?: "/cosmwasm.wasm.v1.InstantiateContractProposal";
   /** Title is a short summary */
   title: string;
   /** Description is a human readable text */
@@ -116,7 +96,7 @@ export interface InstantiateContractProposal {
   admin: string;
   /** CodeID is the reference to the stored WASM code */
   codeId: bigint;
-  /** Label is optional metadata to be stored with a constract instance. */
+  /** Label is optional metadata to be stored with a contract instance. */
   label: string;
   /** Msg json encoded message to be passed to the contract on instantiation */
   msg: Uint8Array;
@@ -136,19 +116,19 @@ export interface InstantiateContractProposalProtoMsg {
 /** @deprecated */
 export interface InstantiateContractProposalAmino {
   /** Title is a short summary */
-  title?: string;
+  title: string;
   /** Description is a human readable text */
-  description?: string;
+  description: string;
   /** RunAs is the address that is passed to the contract's environment as sender */
-  run_as?: string;
+  run_as: string;
   /** Admin is an optional address that can execute migrations */
-  admin?: string;
+  admin: string;
   /** CodeID is the reference to the stored WASM code */
-  code_id?: string;
-  /** Label is optional metadata to be stored with a constract instance. */
-  label?: string;
+  code_id: string;
+  /** Label is optional metadata to be stored with a contract instance. */
+  label: string;
   /** Msg json encoded message to be passed to the contract on instantiation */
-  msg?: any;
+  msg: any;
   /** Funds coins that are transferred to the contract on instantiation */
   funds: CoinAmino[];
 }
@@ -158,42 +138,23 @@ export interface InstantiateContractProposalAminoMsg {
 }
 /**
  * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
- * an explicit InstantiateContractProposal. To instantiate a contract,
- * a simple MsgInstantiateContract can be invoked from the x/gov module via
- * a v1 governance proposal.
- */
-/** @deprecated */
-export interface InstantiateContractProposalSDKType {
-  $typeUrl?: "/cosmwasm.wasm.v1.InstantiateContractProposal";
-  title: string;
-  description: string;
-  run_as: string;
-  admin: string;
-  code_id: bigint;
-  label: string;
-  msg: Uint8Array;
-  funds: CoinSDKType[];
-}
-/**
- * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
  * an explicit InstantiateContract2Proposal. To instantiate contract 2,
  * a simple MsgInstantiateContract2 can be invoked from the x/gov module via
  * a v1 governance proposal.
  */
 /** @deprecated */
 export interface InstantiateContract2Proposal {
-  $typeUrl?: "/cosmwasm.wasm.v1.InstantiateContract2Proposal";
   /** Title is a short summary */
   title: string;
   /** Description is a human readable text */
   description: string;
-  /** RunAs is the address that is passed to the contract's enviroment as sender */
+  /** RunAs is the address that is passed to the contract's environment as sender */
   runAs: string;
   /** Admin is an optional address that can execute migrations */
   admin: string;
   /** CodeID is the reference to the stored WASM code */
   codeId: bigint;
-  /** Label is optional metadata to be stored with a constract instance. */
+  /** Label is optional metadata to be stored with a contract instance. */
   label: string;
   /** Msg json encode message to be passed to the contract on instantiation */
   msg: Uint8Array;
@@ -220,52 +181,32 @@ export interface InstantiateContract2ProposalProtoMsg {
 /** @deprecated */
 export interface InstantiateContract2ProposalAmino {
   /** Title is a short summary */
-  title?: string;
+  title: string;
   /** Description is a human readable text */
-  description?: string;
-  /** RunAs is the address that is passed to the contract's enviroment as sender */
-  run_as?: string;
+  description: string;
+  /** RunAs is the address that is passed to the contract's environment as sender */
+  run_as: string;
   /** Admin is an optional address that can execute migrations */
-  admin?: string;
+  admin: string;
   /** CodeID is the reference to the stored WASM code */
-  code_id?: string;
-  /** Label is optional metadata to be stored with a constract instance. */
-  label?: string;
+  code_id: string;
+  /** Label is optional metadata to be stored with a contract instance. */
+  label: string;
   /** Msg json encode message to be passed to the contract on instantiation */
-  msg?: any;
+  msg: any;
   /** Funds coins that are transferred to the contract on instantiation */
   funds: CoinAmino[];
   /** Salt is an arbitrary value provided by the sender. Size can be 1 to 64. */
-  salt?: string;
+  salt: string;
   /**
    * FixMsg include the msg value into the hash for the predictable address.
    * Default is false
    */
-  fix_msg?: boolean;
+  fix_msg: boolean;
 }
 export interface InstantiateContract2ProposalAminoMsg {
   type: "wasm/InstantiateContract2Proposal";
   value: InstantiateContract2ProposalAmino;
-}
-/**
- * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
- * an explicit InstantiateContract2Proposal. To instantiate contract 2,
- * a simple MsgInstantiateContract2 can be invoked from the x/gov module via
- * a v1 governance proposal.
- */
-/** @deprecated */
-export interface InstantiateContract2ProposalSDKType {
-  $typeUrl?: "/cosmwasm.wasm.v1.InstantiateContract2Proposal";
-  title: string;
-  description: string;
-  run_as: string;
-  admin: string;
-  code_id: bigint;
-  label: string;
-  msg: Uint8Array;
-  funds: CoinSDKType[];
-  salt: Uint8Array;
-  fix_msg: boolean;
 }
 /**
  * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
@@ -275,7 +216,6 @@ export interface InstantiateContract2ProposalSDKType {
  */
 /** @deprecated */
 export interface MigrateContractProposal {
-  $typeUrl?: "/cosmwasm.wasm.v1.MigrateContractProposal";
   /** Title is a short summary */
   title: string;
   /** Description is a human readable text */
@@ -300,34 +240,19 @@ export interface MigrateContractProposalProtoMsg {
 /** @deprecated */
 export interface MigrateContractProposalAmino {
   /** Title is a short summary */
-  title?: string;
+  title: string;
   /** Description is a human readable text */
-  description?: string;
+  description: string;
   /** Contract is the address of the smart contract */
-  contract?: string;
+  contract: string;
   /** CodeID references the new WASM code */
-  code_id?: string;
+  code_id: string;
   /** Msg json encoded message to be passed to the contract on migration */
-  msg?: any;
+  msg: any;
 }
 export interface MigrateContractProposalAminoMsg {
   type: "wasm/MigrateContractProposal";
   value: MigrateContractProposalAmino;
-}
-/**
- * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
- * an explicit MigrateContractProposal. To migrate a contract,
- * a simple MsgMigrateContract can be invoked from the x/gov module via
- * a v1 governance proposal.
- */
-/** @deprecated */
-export interface MigrateContractProposalSDKType {
-  $typeUrl?: "/cosmwasm.wasm.v1.MigrateContractProposal";
-  title: string;
-  description: string;
-  contract: string;
-  code_id: bigint;
-  msg: Uint8Array;
 }
 /**
  * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
@@ -337,7 +262,6 @@ export interface MigrateContractProposalSDKType {
  */
 /** @deprecated */
 export interface SudoContractProposal {
-  $typeUrl?: "/cosmwasm.wasm.v1.SudoContractProposal";
   /** Title is a short summary */
   title: string;
   /** Description is a human readable text */
@@ -360,31 +284,17 @@ export interface SudoContractProposalProtoMsg {
 /** @deprecated */
 export interface SudoContractProposalAmino {
   /** Title is a short summary */
-  title?: string;
+  title: string;
   /** Description is a human readable text */
-  description?: string;
+  description: string;
   /** Contract is the address of the smart contract */
-  contract?: string;
+  contract: string;
   /** Msg json encoded message to be passed to the contract as sudo */
-  msg?: any;
+  msg: any;
 }
 export interface SudoContractProposalAminoMsg {
   type: "wasm/SudoContractProposal";
   value: SudoContractProposalAmino;
-}
-/**
- * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
- * an explicit SudoContractProposal. To call sudo on a contract,
- * a simple MsgSudoContract can be invoked from the x/gov module via
- * a v1 governance proposal.
- */
-/** @deprecated */
-export interface SudoContractProposalSDKType {
-  $typeUrl?: "/cosmwasm.wasm.v1.SudoContractProposal";
-  title: string;
-  description: string;
-  contract: string;
-  msg: Uint8Array;
 }
 /**
  * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
@@ -394,7 +304,6 @@ export interface SudoContractProposalSDKType {
  */
 /** @deprecated */
 export interface ExecuteContractProposal {
-  $typeUrl?: "/cosmwasm.wasm.v1.ExecuteContractProposal";
   /** Title is a short summary */
   title: string;
   /** Description is a human readable text */
@@ -421,15 +330,15 @@ export interface ExecuteContractProposalProtoMsg {
 /** @deprecated */
 export interface ExecuteContractProposalAmino {
   /** Title is a short summary */
-  title?: string;
+  title: string;
   /** Description is a human readable text */
-  description?: string;
+  description: string;
   /** RunAs is the address that is passed to the contract's environment as sender */
-  run_as?: string;
+  run_as: string;
   /** Contract is the address of the smart contract */
-  contract?: string;
+  contract: string;
   /** Msg json encoded message to be passed to the contract as execute */
-  msg?: any;
+  msg: any;
   /** Funds coins that are transferred to the contract on instantiation */
   funds: CoinAmino[];
 }
@@ -439,29 +348,12 @@ export interface ExecuteContractProposalAminoMsg {
 }
 /**
  * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
- * an explicit ExecuteContractProposal. To call execute on a contract,
- * a simple MsgExecuteContract can be invoked from the x/gov module via
- * a v1 governance proposal.
- */
-/** @deprecated */
-export interface ExecuteContractProposalSDKType {
-  $typeUrl?: "/cosmwasm.wasm.v1.ExecuteContractProposal";
-  title: string;
-  description: string;
-  run_as: string;
-  contract: string;
-  msg: Uint8Array;
-  funds: CoinSDKType[];
-}
-/**
- * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
  * an explicit UpdateAdminProposal. To set an admin for a contract,
  * a simple MsgUpdateAdmin can be invoked from the x/gov module via
  * a v1 governance proposal.
  */
 /** @deprecated */
 export interface UpdateAdminProposal {
-  $typeUrl?: "/cosmwasm.wasm.v1.UpdateAdminProposal";
   /** Title is a short summary */
   title: string;
   /** Description is a human readable text */
@@ -484,31 +376,17 @@ export interface UpdateAdminProposalProtoMsg {
 /** @deprecated */
 export interface UpdateAdminProposalAmino {
   /** Title is a short summary */
-  title?: string;
+  title: string;
   /** Description is a human readable text */
-  description?: string;
+  description: string;
   /** NewAdmin address to be set */
-  new_admin?: string;
+  new_admin: string;
   /** Contract is the address of the smart contract */
-  contract?: string;
+  contract: string;
 }
 export interface UpdateAdminProposalAminoMsg {
   type: "wasm/UpdateAdminProposal";
   value: UpdateAdminProposalAmino;
-}
-/**
- * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
- * an explicit UpdateAdminProposal. To set an admin for a contract,
- * a simple MsgUpdateAdmin can be invoked from the x/gov module via
- * a v1 governance proposal.
- */
-/** @deprecated */
-export interface UpdateAdminProposalSDKType {
-  $typeUrl?: "/cosmwasm.wasm.v1.UpdateAdminProposal";
-  title: string;
-  description: string;
-  new_admin: string;
-  contract: string;
 }
 /**
  * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
@@ -518,7 +396,6 @@ export interface UpdateAdminProposalSDKType {
  */
 /** @deprecated */
 export interface ClearAdminProposal {
-  $typeUrl?: "/cosmwasm.wasm.v1.ClearAdminProposal";
   /** Title is a short summary */
   title: string;
   /** Description is a human readable text */
@@ -539,28 +416,15 @@ export interface ClearAdminProposalProtoMsg {
 /** @deprecated */
 export interface ClearAdminProposalAmino {
   /** Title is a short summary */
-  title?: string;
+  title: string;
   /** Description is a human readable text */
-  description?: string;
+  description: string;
   /** Contract is the address of the smart contract */
-  contract?: string;
+  contract: string;
 }
 export interface ClearAdminProposalAminoMsg {
   type: "wasm/ClearAdminProposal";
   value: ClearAdminProposalAmino;
-}
-/**
- * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
- * an explicit ClearAdminProposal. To clear the admin of a contract,
- * a simple MsgClearAdmin can be invoked from the x/gov module via
- * a v1 governance proposal.
- */
-/** @deprecated */
-export interface ClearAdminProposalSDKType {
-  $typeUrl?: "/cosmwasm.wasm.v1.ClearAdminProposal";
-  title: string;
-  description: string;
-  contract: string;
 }
 /**
  * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
@@ -570,7 +434,6 @@ export interface ClearAdminProposalSDKType {
  */
 /** @deprecated */
 export interface PinCodesProposal {
-  $typeUrl?: "/cosmwasm.wasm.v1.PinCodesProposal";
   /** Title is a short summary */
   title: string;
   /** Description is a human readable text */
@@ -591,28 +454,15 @@ export interface PinCodesProposalProtoMsg {
 /** @deprecated */
 export interface PinCodesProposalAmino {
   /** Title is a short summary */
-  title?: string;
+  title: string;
   /** Description is a human readable text */
-  description?: string;
+  description: string;
   /** CodeIDs references the new WASM codes */
-  code_ids?: string[];
+  code_ids: string[];
 }
 export interface PinCodesProposalAminoMsg {
   type: "wasm/PinCodesProposal";
   value: PinCodesProposalAmino;
-}
-/**
- * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
- * an explicit PinCodesProposal. To pin a set of code ids in the wasmvm
- * cache, a simple MsgPinCodes can be invoked from the x/gov module via
- * a v1 governance proposal.
- */
-/** @deprecated */
-export interface PinCodesProposalSDKType {
-  $typeUrl?: "/cosmwasm.wasm.v1.PinCodesProposal";
-  title: string;
-  description: string;
-  code_ids: bigint[];
 }
 /**
  * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
@@ -622,7 +472,6 @@ export interface PinCodesProposalSDKType {
  */
 /** @deprecated */
 export interface UnpinCodesProposal {
-  $typeUrl?: "/cosmwasm.wasm.v1.UnpinCodesProposal";
   /** Title is a short summary */
   title: string;
   /** Description is a human readable text */
@@ -643,28 +492,15 @@ export interface UnpinCodesProposalProtoMsg {
 /** @deprecated */
 export interface UnpinCodesProposalAmino {
   /** Title is a short summary */
-  title?: string;
+  title: string;
   /** Description is a human readable text */
-  description?: string;
+  description: string;
   /** CodeIDs references the WASM codes */
-  code_ids?: string[];
+  code_ids: string[];
 }
 export interface UnpinCodesProposalAminoMsg {
   type: "wasm/UnpinCodesProposal";
   value: UnpinCodesProposalAmino;
-}
-/**
- * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
- * an explicit UnpinCodesProposal. To unpin a set of code ids in the wasmvm
- * cache, a simple MsgUnpinCodes can be invoked from the x/gov module via
- * a v1 governance proposal.
- */
-/** @deprecated */
-export interface UnpinCodesProposalSDKType {
-  $typeUrl?: "/cosmwasm.wasm.v1.UnpinCodesProposal";
-  title: string;
-  description: string;
-  code_ids: bigint[];
 }
 /**
  * AccessConfigUpdate contains the code id and the access config to be
@@ -686,21 +522,13 @@ export interface AccessConfigUpdateProtoMsg {
  */
 export interface AccessConfigUpdateAmino {
   /** CodeID is the reference to the stored WASM code to be updated */
-  code_id?: string;
+  code_id: string;
   /** InstantiatePermission to apply to the set of code ids */
   instantiate_permission: AccessConfigAmino;
 }
 export interface AccessConfigUpdateAminoMsg {
   type: "wasm/AccessConfigUpdate";
   value: AccessConfigUpdateAmino;
-}
-/**
- * AccessConfigUpdate contains the code id and the access config to be
- * applied.
- */
-export interface AccessConfigUpdateSDKType {
-  code_id: bigint;
-  instantiate_permission: AccessConfigSDKType;
 }
 /**
  * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
@@ -710,7 +538,6 @@ export interface AccessConfigUpdateSDKType {
  */
 /** @deprecated */
 export interface UpdateInstantiateConfigProposal {
-  $typeUrl?: "/cosmwasm.wasm.v1.UpdateInstantiateConfigProposal";
   /** Title is a short summary */
   title: string;
   /** Description is a human readable text */
@@ -734,9 +561,9 @@ export interface UpdateInstantiateConfigProposalProtoMsg {
 /** @deprecated */
 export interface UpdateInstantiateConfigProposalAmino {
   /** Title is a short summary */
-  title?: string;
+  title: string;
   /** Description is a human readable text */
-  description?: string;
+  description: string;
   /**
    * AccessConfigUpdate contains the list of code ids and the access config
    * to be applied.
@@ -749,26 +576,12 @@ export interface UpdateInstantiateConfigProposalAminoMsg {
 }
 /**
  * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
- * an explicit UpdateInstantiateConfigProposal. To update instantiate config
- * to a set of code ids, a simple MsgUpdateInstantiateConfig can be invoked from
- * the x/gov module via a v1 governance proposal.
- */
-/** @deprecated */
-export interface UpdateInstantiateConfigProposalSDKType {
-  $typeUrl?: "/cosmwasm.wasm.v1.UpdateInstantiateConfigProposal";
-  title: string;
-  description: string;
-  access_config_updates: AccessConfigUpdateSDKType[];
-}
-/**
- * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
  * an explicit StoreAndInstantiateContractProposal. To store and instantiate
  * the contract, a simple MsgStoreAndInstantiateContract can be invoked from
  * the x/gov module via a v1 governance proposal.
  */
 /** @deprecated */
 export interface StoreAndInstantiateContractProposal {
-  $typeUrl?: "/cosmwasm.wasm.v1.StoreAndInstantiateContractProposal";
   /** Title is a short summary */
   title: string;
   /** Description is a human readable text */
@@ -783,7 +596,7 @@ export interface StoreAndInstantiateContractProposal {
   unpinCode: boolean;
   /** Admin is an optional address that can execute migrations */
   admin: string;
-  /** Label is optional metadata to be stored with a constract instance. */
+  /** Label is optional metadata to be stored with a contract instance. */
   label: string;
   /** Msg json encoded message to be passed to the contract on instantiation */
   msg: Uint8Array;
@@ -815,68 +628,44 @@ export interface StoreAndInstantiateContractProposalProtoMsg {
 /** @deprecated */
 export interface StoreAndInstantiateContractProposalAmino {
   /** Title is a short summary */
-  title?: string;
+  title: string;
   /** Description is a human readable text */
-  description?: string;
+  description: string;
   /** RunAs is the address that is passed to the contract's environment as sender */
-  run_as?: string;
+  run_as: string;
   /** WASMByteCode can be raw or gzip compressed */
-  wasm_byte_code?: string;
+  wasm_byte_code: string;
   /** InstantiatePermission to apply on contract creation, optional */
   instantiate_permission?: AccessConfigAmino;
   /** UnpinCode code on upload, optional */
-  unpin_code?: boolean;
+  unpin_code: boolean;
   /** Admin is an optional address that can execute migrations */
-  admin?: string;
-  /** Label is optional metadata to be stored with a constract instance. */
-  label?: string;
+  admin: string;
+  /** Label is optional metadata to be stored with a contract instance. */
+  label: string;
   /** Msg json encoded message to be passed to the contract on instantiation */
-  msg?: any;
+  msg: any;
   /** Funds coins that are transferred to the contract on instantiation */
   funds: CoinAmino[];
   /** Source is the URL where the code is hosted */
-  source?: string;
+  source: string;
   /**
    * Builder is the docker image used to build the code deterministically, used
    * for smart contract verification
    */
-  builder?: string;
+  builder: string;
   /**
    * CodeHash is the SHA256 sum of the code outputted by builder, used for smart
    * contract verification
    */
-  code_hash?: string;
+  code_hash: string;
 }
 export interface StoreAndInstantiateContractProposalAminoMsg {
   type: "wasm/StoreAndInstantiateContractProposal";
   value: StoreAndInstantiateContractProposalAmino;
 }
-/**
- * Deprecated: Do not use. Since wasmd v0.40, there is no longer a need for
- * an explicit StoreAndInstantiateContractProposal. To store and instantiate
- * the contract, a simple MsgStoreAndInstantiateContract can be invoked from
- * the x/gov module via a v1 governance proposal.
- */
-/** @deprecated */
-export interface StoreAndInstantiateContractProposalSDKType {
-  $typeUrl?: "/cosmwasm.wasm.v1.StoreAndInstantiateContractProposal";
-  title: string;
-  description: string;
-  run_as: string;
-  wasm_byte_code: Uint8Array;
-  instantiate_permission?: AccessConfigSDKType;
-  unpin_code: boolean;
-  admin: string;
-  label: string;
-  msg: Uint8Array;
-  funds: CoinSDKType[];
-  source: string;
-  builder: string;
-  code_hash: Uint8Array;
-}
 function createBaseStoreCodeProposal(): StoreCodeProposal {
   return {
-    $typeUrl: "/cosmwasm.wasm.v1.StoreCodeProposal",
     title: "",
     description: "",
     runAs: "",
@@ -891,6 +680,12 @@ function createBaseStoreCodeProposal(): StoreCodeProposal {
 export const StoreCodeProposal = {
   typeUrl: "/cosmwasm.wasm.v1.StoreCodeProposal",
   aminoType: "wasm/StoreCodeProposal",
+  is(o: any): o is StoreCodeProposal {
+    return o && (o.$typeUrl === StoreCodeProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && typeof o.runAs === "string" && (o.wasmByteCode instanceof Uint8Array || typeof o.wasmByteCode === "string") && typeof o.unpinCode === "boolean" && typeof o.source === "string" && typeof o.builder === "string" && (o.codeHash instanceof Uint8Array || typeof o.codeHash === "string"));
+  },
+  isAmino(o: any): o is StoreCodeProposalAmino {
+    return o && (o.$typeUrl === StoreCodeProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && typeof o.run_as === "string" && (o.wasm_byte_code instanceof Uint8Array || typeof o.wasm_byte_code === "string") && typeof o.unpin_code === "boolean" && typeof o.source === "string" && typeof o.builder === "string" && (o.code_hash instanceof Uint8Array || typeof o.code_hash === "string"));
+  },
   encode(message: StoreCodeProposal, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.title !== "") {
       writer.uint32(10).string(message.title);
@@ -1041,9 +836,10 @@ export const StoreCodeProposal = {
     };
   }
 };
+GlobalDecoderRegistry.register(StoreCodeProposal.typeUrl, StoreCodeProposal);
+GlobalDecoderRegistry.registerAminoProtoMapping(StoreCodeProposal.aminoType, StoreCodeProposal.typeUrl);
 function createBaseInstantiateContractProposal(): InstantiateContractProposal {
   return {
-    $typeUrl: "/cosmwasm.wasm.v1.InstantiateContractProposal",
     title: "",
     description: "",
     runAs: "",
@@ -1057,6 +853,12 @@ function createBaseInstantiateContractProposal(): InstantiateContractProposal {
 export const InstantiateContractProposal = {
   typeUrl: "/cosmwasm.wasm.v1.InstantiateContractProposal",
   aminoType: "wasm/InstantiateContractProposal",
+  is(o: any): o is InstantiateContractProposal {
+    return o && (o.$typeUrl === InstantiateContractProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && typeof o.runAs === "string" && typeof o.admin === "string" && typeof o.codeId === "bigint" && typeof o.label === "string" && (o.msg instanceof Uint8Array || typeof o.msg === "string") && Array.isArray(o.funds) && (!o.funds.length || Coin.is(o.funds[0])));
+  },
+  isAmino(o: any): o is InstantiateContractProposalAmino {
+    return o && (o.$typeUrl === InstantiateContractProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && typeof o.run_as === "string" && typeof o.admin === "string" && typeof o.code_id === "bigint" && typeof o.label === "string" && (o.msg instanceof Uint8Array || typeof o.msg === "string") && Array.isArray(o.funds) && (!o.funds.length || Coin.isAmino(o.funds[0])));
+  },
   encode(message: InstantiateContractProposal, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.title !== "") {
       writer.uint32(10).string(message.title);
@@ -1198,9 +1000,10 @@ export const InstantiateContractProposal = {
     };
   }
 };
+GlobalDecoderRegistry.register(InstantiateContractProposal.typeUrl, InstantiateContractProposal);
+GlobalDecoderRegistry.registerAminoProtoMapping(InstantiateContractProposal.aminoType, InstantiateContractProposal.typeUrl);
 function createBaseInstantiateContract2Proposal(): InstantiateContract2Proposal {
   return {
-    $typeUrl: "/cosmwasm.wasm.v1.InstantiateContract2Proposal",
     title: "",
     description: "",
     runAs: "",
@@ -1216,6 +1019,12 @@ function createBaseInstantiateContract2Proposal(): InstantiateContract2Proposal 
 export const InstantiateContract2Proposal = {
   typeUrl: "/cosmwasm.wasm.v1.InstantiateContract2Proposal",
   aminoType: "wasm/InstantiateContract2Proposal",
+  is(o: any): o is InstantiateContract2Proposal {
+    return o && (o.$typeUrl === InstantiateContract2Proposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && typeof o.runAs === "string" && typeof o.admin === "string" && typeof o.codeId === "bigint" && typeof o.label === "string" && (o.msg instanceof Uint8Array || typeof o.msg === "string") && Array.isArray(o.funds) && (!o.funds.length || Coin.is(o.funds[0])) && (o.salt instanceof Uint8Array || typeof o.salt === "string") && typeof o.fixMsg === "boolean");
+  },
+  isAmino(o: any): o is InstantiateContract2ProposalAmino {
+    return o && (o.$typeUrl === InstantiateContract2Proposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && typeof o.run_as === "string" && typeof o.admin === "string" && typeof o.code_id === "bigint" && typeof o.label === "string" && (o.msg instanceof Uint8Array || typeof o.msg === "string") && Array.isArray(o.funds) && (!o.funds.length || Coin.isAmino(o.funds[0])) && (o.salt instanceof Uint8Array || typeof o.salt === "string") && typeof o.fix_msg === "boolean");
+  },
   encode(message: InstantiateContract2Proposal, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.title !== "") {
       writer.uint32(10).string(message.title);
@@ -1379,9 +1188,10 @@ export const InstantiateContract2Proposal = {
     };
   }
 };
+GlobalDecoderRegistry.register(InstantiateContract2Proposal.typeUrl, InstantiateContract2Proposal);
+GlobalDecoderRegistry.registerAminoProtoMapping(InstantiateContract2Proposal.aminoType, InstantiateContract2Proposal.typeUrl);
 function createBaseMigrateContractProposal(): MigrateContractProposal {
   return {
-    $typeUrl: "/cosmwasm.wasm.v1.MigrateContractProposal",
     title: "",
     description: "",
     contract: "",
@@ -1392,6 +1202,12 @@ function createBaseMigrateContractProposal(): MigrateContractProposal {
 export const MigrateContractProposal = {
   typeUrl: "/cosmwasm.wasm.v1.MigrateContractProposal",
   aminoType: "wasm/MigrateContractProposal",
+  is(o: any): o is MigrateContractProposal {
+    return o && (o.$typeUrl === MigrateContractProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && typeof o.contract === "string" && typeof o.codeId === "bigint" && (o.msg instanceof Uint8Array || typeof o.msg === "string"));
+  },
+  isAmino(o: any): o is MigrateContractProposalAmino {
+    return o && (o.$typeUrl === MigrateContractProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && typeof o.contract === "string" && typeof o.code_id === "bigint" && (o.msg instanceof Uint8Array || typeof o.msg === "string"));
+  },
   encode(message: MigrateContractProposal, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.title !== "") {
       writer.uint32(10).string(message.title);
@@ -1498,9 +1314,10 @@ export const MigrateContractProposal = {
     };
   }
 };
+GlobalDecoderRegistry.register(MigrateContractProposal.typeUrl, MigrateContractProposal);
+GlobalDecoderRegistry.registerAminoProtoMapping(MigrateContractProposal.aminoType, MigrateContractProposal.typeUrl);
 function createBaseSudoContractProposal(): SudoContractProposal {
   return {
-    $typeUrl: "/cosmwasm.wasm.v1.SudoContractProposal",
     title: "",
     description: "",
     contract: "",
@@ -1510,6 +1327,12 @@ function createBaseSudoContractProposal(): SudoContractProposal {
 export const SudoContractProposal = {
   typeUrl: "/cosmwasm.wasm.v1.SudoContractProposal",
   aminoType: "wasm/SudoContractProposal",
+  is(o: any): o is SudoContractProposal {
+    return o && (o.$typeUrl === SudoContractProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && typeof o.contract === "string" && (o.msg instanceof Uint8Array || typeof o.msg === "string"));
+  },
+  isAmino(o: any): o is SudoContractProposalAmino {
+    return o && (o.$typeUrl === SudoContractProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && typeof o.contract === "string" && (o.msg instanceof Uint8Array || typeof o.msg === "string"));
+  },
   encode(message: SudoContractProposal, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.title !== "") {
       writer.uint32(10).string(message.title);
@@ -1605,9 +1428,10 @@ export const SudoContractProposal = {
     };
   }
 };
+GlobalDecoderRegistry.register(SudoContractProposal.typeUrl, SudoContractProposal);
+GlobalDecoderRegistry.registerAminoProtoMapping(SudoContractProposal.aminoType, SudoContractProposal.typeUrl);
 function createBaseExecuteContractProposal(): ExecuteContractProposal {
   return {
-    $typeUrl: "/cosmwasm.wasm.v1.ExecuteContractProposal",
     title: "",
     description: "",
     runAs: "",
@@ -1619,6 +1443,12 @@ function createBaseExecuteContractProposal(): ExecuteContractProposal {
 export const ExecuteContractProposal = {
   typeUrl: "/cosmwasm.wasm.v1.ExecuteContractProposal",
   aminoType: "wasm/ExecuteContractProposal",
+  is(o: any): o is ExecuteContractProposal {
+    return o && (o.$typeUrl === ExecuteContractProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && typeof o.runAs === "string" && typeof o.contract === "string" && (o.msg instanceof Uint8Array || typeof o.msg === "string") && Array.isArray(o.funds) && (!o.funds.length || Coin.is(o.funds[0])));
+  },
+  isAmino(o: any): o is ExecuteContractProposalAmino {
+    return o && (o.$typeUrl === ExecuteContractProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && typeof o.run_as === "string" && typeof o.contract === "string" && (o.msg instanceof Uint8Array || typeof o.msg === "string") && Array.isArray(o.funds) && (!o.funds.length || Coin.isAmino(o.funds[0])));
+  },
   encode(message: ExecuteContractProposal, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.title !== "") {
       writer.uint32(10).string(message.title);
@@ -1738,9 +1568,10 @@ export const ExecuteContractProposal = {
     };
   }
 };
+GlobalDecoderRegistry.register(ExecuteContractProposal.typeUrl, ExecuteContractProposal);
+GlobalDecoderRegistry.registerAminoProtoMapping(ExecuteContractProposal.aminoType, ExecuteContractProposal.typeUrl);
 function createBaseUpdateAdminProposal(): UpdateAdminProposal {
   return {
-    $typeUrl: "/cosmwasm.wasm.v1.UpdateAdminProposal",
     title: "",
     description: "",
     newAdmin: "",
@@ -1750,6 +1581,12 @@ function createBaseUpdateAdminProposal(): UpdateAdminProposal {
 export const UpdateAdminProposal = {
   typeUrl: "/cosmwasm.wasm.v1.UpdateAdminProposal",
   aminoType: "wasm/UpdateAdminProposal",
+  is(o: any): o is UpdateAdminProposal {
+    return o && (o.$typeUrl === UpdateAdminProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && typeof o.newAdmin === "string" && typeof o.contract === "string");
+  },
+  isAmino(o: any): o is UpdateAdminProposalAmino {
+    return o && (o.$typeUrl === UpdateAdminProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && typeof o.new_admin === "string" && typeof o.contract === "string");
+  },
   encode(message: UpdateAdminProposal, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.title !== "") {
       writer.uint32(10).string(message.title);
@@ -1845,9 +1682,10 @@ export const UpdateAdminProposal = {
     };
   }
 };
+GlobalDecoderRegistry.register(UpdateAdminProposal.typeUrl, UpdateAdminProposal);
+GlobalDecoderRegistry.registerAminoProtoMapping(UpdateAdminProposal.aminoType, UpdateAdminProposal.typeUrl);
 function createBaseClearAdminProposal(): ClearAdminProposal {
   return {
-    $typeUrl: "/cosmwasm.wasm.v1.ClearAdminProposal",
     title: "",
     description: "",
     contract: ""
@@ -1856,6 +1694,12 @@ function createBaseClearAdminProposal(): ClearAdminProposal {
 export const ClearAdminProposal = {
   typeUrl: "/cosmwasm.wasm.v1.ClearAdminProposal",
   aminoType: "wasm/ClearAdminProposal",
+  is(o: any): o is ClearAdminProposal {
+    return o && (o.$typeUrl === ClearAdminProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && typeof o.contract === "string");
+  },
+  isAmino(o: any): o is ClearAdminProposalAmino {
+    return o && (o.$typeUrl === ClearAdminProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && typeof o.contract === "string");
+  },
   encode(message: ClearAdminProposal, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.title !== "") {
       writer.uint32(10).string(message.title);
@@ -1940,9 +1784,10 @@ export const ClearAdminProposal = {
     };
   }
 };
+GlobalDecoderRegistry.register(ClearAdminProposal.typeUrl, ClearAdminProposal);
+GlobalDecoderRegistry.registerAminoProtoMapping(ClearAdminProposal.aminoType, ClearAdminProposal.typeUrl);
 function createBasePinCodesProposal(): PinCodesProposal {
   return {
-    $typeUrl: "/cosmwasm.wasm.v1.PinCodesProposal",
     title: "",
     description: "",
     codeIds: []
@@ -1951,6 +1796,12 @@ function createBasePinCodesProposal(): PinCodesProposal {
 export const PinCodesProposal = {
   typeUrl: "/cosmwasm.wasm.v1.PinCodesProposal",
   aminoType: "wasm/PinCodesProposal",
+  is(o: any): o is PinCodesProposal {
+    return o && (o.$typeUrl === PinCodesProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && Array.isArray(o.codeIds) && (!o.codeIds.length || typeof o.codeIds[0] === "bigint"));
+  },
+  isAmino(o: any): o is PinCodesProposalAmino {
+    return o && (o.$typeUrl === PinCodesProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && Array.isArray(o.code_ids) && (!o.code_ids.length || typeof o.code_ids[0] === "bigint"));
+  },
   encode(message: PinCodesProposal, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.title !== "") {
       writer.uint32(10).string(message.title);
@@ -2046,9 +1897,10 @@ export const PinCodesProposal = {
     };
   }
 };
+GlobalDecoderRegistry.register(PinCodesProposal.typeUrl, PinCodesProposal);
+GlobalDecoderRegistry.registerAminoProtoMapping(PinCodesProposal.aminoType, PinCodesProposal.typeUrl);
 function createBaseUnpinCodesProposal(): UnpinCodesProposal {
   return {
-    $typeUrl: "/cosmwasm.wasm.v1.UnpinCodesProposal",
     title: "",
     description: "",
     codeIds: []
@@ -2057,6 +1909,12 @@ function createBaseUnpinCodesProposal(): UnpinCodesProposal {
 export const UnpinCodesProposal = {
   typeUrl: "/cosmwasm.wasm.v1.UnpinCodesProposal",
   aminoType: "wasm/UnpinCodesProposal",
+  is(o: any): o is UnpinCodesProposal {
+    return o && (o.$typeUrl === UnpinCodesProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && Array.isArray(o.codeIds) && (!o.codeIds.length || typeof o.codeIds[0] === "bigint"));
+  },
+  isAmino(o: any): o is UnpinCodesProposalAmino {
+    return o && (o.$typeUrl === UnpinCodesProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && Array.isArray(o.code_ids) && (!o.code_ids.length || typeof o.code_ids[0] === "bigint"));
+  },
   encode(message: UnpinCodesProposal, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.title !== "") {
       writer.uint32(10).string(message.title);
@@ -2152,6 +2010,8 @@ export const UnpinCodesProposal = {
     };
   }
 };
+GlobalDecoderRegistry.register(UnpinCodesProposal.typeUrl, UnpinCodesProposal);
+GlobalDecoderRegistry.registerAminoProtoMapping(UnpinCodesProposal.aminoType, UnpinCodesProposal.typeUrl);
 function createBaseAccessConfigUpdate(): AccessConfigUpdate {
   return {
     codeId: BigInt(0),
@@ -2161,6 +2021,12 @@ function createBaseAccessConfigUpdate(): AccessConfigUpdate {
 export const AccessConfigUpdate = {
   typeUrl: "/cosmwasm.wasm.v1.AccessConfigUpdate",
   aminoType: "wasm/AccessConfigUpdate",
+  is(o: any): o is AccessConfigUpdate {
+    return o && (o.$typeUrl === AccessConfigUpdate.typeUrl || typeof o.codeId === "bigint" && AccessConfig.is(o.instantiatePermission));
+  },
+  isAmino(o: any): o is AccessConfigUpdateAmino {
+    return o && (o.$typeUrl === AccessConfigUpdate.typeUrl || typeof o.code_id === "bigint" && AccessConfig.isAmino(o.instantiate_permission));
+  },
   encode(message: AccessConfigUpdate, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.codeId !== BigInt(0)) {
       writer.uint32(8).uint64(message.codeId);
@@ -2234,9 +2100,10 @@ export const AccessConfigUpdate = {
     };
   }
 };
+GlobalDecoderRegistry.register(AccessConfigUpdate.typeUrl, AccessConfigUpdate);
+GlobalDecoderRegistry.registerAminoProtoMapping(AccessConfigUpdate.aminoType, AccessConfigUpdate.typeUrl);
 function createBaseUpdateInstantiateConfigProposal(): UpdateInstantiateConfigProposal {
   return {
-    $typeUrl: "/cosmwasm.wasm.v1.UpdateInstantiateConfigProposal",
     title: "",
     description: "",
     accessConfigUpdates: []
@@ -2245,6 +2112,12 @@ function createBaseUpdateInstantiateConfigProposal(): UpdateInstantiateConfigPro
 export const UpdateInstantiateConfigProposal = {
   typeUrl: "/cosmwasm.wasm.v1.UpdateInstantiateConfigProposal",
   aminoType: "wasm/UpdateInstantiateConfigProposal",
+  is(o: any): o is UpdateInstantiateConfigProposal {
+    return o && (o.$typeUrl === UpdateInstantiateConfigProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && Array.isArray(o.accessConfigUpdates) && (!o.accessConfigUpdates.length || AccessConfigUpdate.is(o.accessConfigUpdates[0])));
+  },
+  isAmino(o: any): o is UpdateInstantiateConfigProposalAmino {
+    return o && (o.$typeUrl === UpdateInstantiateConfigProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && Array.isArray(o.access_config_updates) && (!o.access_config_updates.length || AccessConfigUpdate.isAmino(o.access_config_updates[0])));
+  },
   encode(message: UpdateInstantiateConfigProposal, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.title !== "") {
       writer.uint32(10).string(message.title);
@@ -2331,9 +2204,10 @@ export const UpdateInstantiateConfigProposal = {
     };
   }
 };
+GlobalDecoderRegistry.register(UpdateInstantiateConfigProposal.typeUrl, UpdateInstantiateConfigProposal);
+GlobalDecoderRegistry.registerAminoProtoMapping(UpdateInstantiateConfigProposal.aminoType, UpdateInstantiateConfigProposal.typeUrl);
 function createBaseStoreAndInstantiateContractProposal(): StoreAndInstantiateContractProposal {
   return {
-    $typeUrl: "/cosmwasm.wasm.v1.StoreAndInstantiateContractProposal",
     title: "",
     description: "",
     runAs: "",
@@ -2352,6 +2226,12 @@ function createBaseStoreAndInstantiateContractProposal(): StoreAndInstantiateCon
 export const StoreAndInstantiateContractProposal = {
   typeUrl: "/cosmwasm.wasm.v1.StoreAndInstantiateContractProposal",
   aminoType: "wasm/StoreAndInstantiateContractProposal",
+  is(o: any): o is StoreAndInstantiateContractProposal {
+    return o && (o.$typeUrl === StoreAndInstantiateContractProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && typeof o.runAs === "string" && (o.wasmByteCode instanceof Uint8Array || typeof o.wasmByteCode === "string") && typeof o.unpinCode === "boolean" && typeof o.admin === "string" && typeof o.label === "string" && (o.msg instanceof Uint8Array || typeof o.msg === "string") && Array.isArray(o.funds) && (!o.funds.length || Coin.is(o.funds[0])) && typeof o.source === "string" && typeof o.builder === "string" && (o.codeHash instanceof Uint8Array || typeof o.codeHash === "string"));
+  },
+  isAmino(o: any): o is StoreAndInstantiateContractProposalAmino {
+    return o && (o.$typeUrl === StoreAndInstantiateContractProposal.typeUrl || typeof o.title === "string" && typeof o.description === "string" && typeof o.run_as === "string" && (o.wasm_byte_code instanceof Uint8Array || typeof o.wasm_byte_code === "string") && typeof o.unpin_code === "boolean" && typeof o.admin === "string" && typeof o.label === "string" && (o.msg instanceof Uint8Array || typeof o.msg === "string") && Array.isArray(o.funds) && (!o.funds.length || Coin.isAmino(o.funds[0])) && typeof o.source === "string" && typeof o.builder === "string" && (o.code_hash instanceof Uint8Array || typeof o.code_hash === "string"));
+  },
   encode(message: StoreAndInstantiateContractProposal, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.title !== "") {
       writer.uint32(10).string(message.title);
@@ -2548,3 +2428,5 @@ export const StoreAndInstantiateContractProposal = {
     };
   }
 };
+GlobalDecoderRegistry.register(StoreAndInstantiateContractProposal.typeUrl, StoreAndInstantiateContractProposal);
+GlobalDecoderRegistry.registerAminoProtoMapping(StoreAndInstantiateContractProposal.aminoType, StoreAndInstantiateContractProposal.typeUrl);

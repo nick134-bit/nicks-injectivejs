@@ -1,54 +1,10 @@
-import { Proof, ProofAmino, ProofSDKType } from "../crypto/proof";
-import { Consensus, ConsensusAmino, ConsensusSDKType } from "../version/types";
+import { Proof, ProofAmino } from "../crypto/proof";
+import { Consensus, ConsensusAmino } from "../version/types";
 import { Timestamp } from "../../google/protobuf/timestamp";
-import { ValidatorSet, ValidatorSetAmino, ValidatorSetSDKType } from "./validator";
+import { BlockIDFlag, ValidatorSet, ValidatorSetAmino } from "./validator";
 import { BinaryReader, BinaryWriter } from "../../binary";
-import { DeepPartial, bytesFromBase64, base64FromBytes, toTimestamp, fromTimestamp } from "../../helpers";
-/** BlockIdFlag indicates which BlcokID the signature is for */
-export enum BlockIDFlag {
-  BLOCK_ID_FLAG_UNKNOWN = 0,
-  BLOCK_ID_FLAG_ABSENT = 1,
-  BLOCK_ID_FLAG_COMMIT = 2,
-  BLOCK_ID_FLAG_NIL = 3,
-  UNRECOGNIZED = -1,
-}
-export const BlockIDFlagSDKType = BlockIDFlag;
-export const BlockIDFlagAmino = BlockIDFlag;
-export function blockIDFlagFromJSON(object: any): BlockIDFlag {
-  switch (object) {
-    case 0:
-    case "BLOCK_ID_FLAG_UNKNOWN":
-      return BlockIDFlag.BLOCK_ID_FLAG_UNKNOWN;
-    case 1:
-    case "BLOCK_ID_FLAG_ABSENT":
-      return BlockIDFlag.BLOCK_ID_FLAG_ABSENT;
-    case 2:
-    case "BLOCK_ID_FLAG_COMMIT":
-      return BlockIDFlag.BLOCK_ID_FLAG_COMMIT;
-    case 3:
-    case "BLOCK_ID_FLAG_NIL":
-      return BlockIDFlag.BLOCK_ID_FLAG_NIL;
-    case -1:
-    case "UNRECOGNIZED":
-    default:
-      return BlockIDFlag.UNRECOGNIZED;
-  }
-}
-export function blockIDFlagToJSON(object: BlockIDFlag): string {
-  switch (object) {
-    case BlockIDFlag.BLOCK_ID_FLAG_UNKNOWN:
-      return "BLOCK_ID_FLAG_UNKNOWN";
-    case BlockIDFlag.BLOCK_ID_FLAG_ABSENT:
-      return "BLOCK_ID_FLAG_ABSENT";
-    case BlockIDFlag.BLOCK_ID_FLAG_COMMIT:
-      return "BLOCK_ID_FLAG_COMMIT";
-    case BlockIDFlag.BLOCK_ID_FLAG_NIL:
-      return "BLOCK_ID_FLAG_NIL";
-    case BlockIDFlag.UNRECOGNIZED:
-    default:
-      return "UNRECOGNIZED";
-  }
-}
+import { DeepPartial, bytesFromBase64, base64FromBytes, toTimestamp, fromTimestamp, isSet } from "../../helpers";
+import { GlobalDecoderRegistry } from "../../registry";
 /** SignedMsgType is a type of signed message in the consensus. */
 export enum SignedMsgType {
   SIGNED_MSG_TYPE_UNKNOWN = 0,
@@ -59,7 +15,6 @@ export enum SignedMsgType {
   SIGNED_MSG_TYPE_PROPOSAL = 32,
   UNRECOGNIZED = -1,
 }
-export const SignedMsgTypeSDKType = SignedMsgType;
 export const SignedMsgTypeAmino = SignedMsgType;
 export function signedMsgTypeFromJSON(object: any): SignedMsgType {
   switch (object) {
@@ -107,17 +62,12 @@ export interface PartSetHeaderProtoMsg {
 }
 /** PartsetHeader */
 export interface PartSetHeaderAmino {
-  total?: number;
-  hash?: string;
+  total: number;
+  hash: string;
 }
 export interface PartSetHeaderAminoMsg {
   type: "/tendermint.types.PartSetHeader";
   value: PartSetHeaderAmino;
-}
-/** PartsetHeader */
-export interface PartSetHeaderSDKType {
-  total: number;
-  hash: Uint8Array;
 }
 export interface Part {
   index: number;
@@ -129,18 +79,13 @@ export interface PartProtoMsg {
   value: Uint8Array;
 }
 export interface PartAmino {
-  index?: number;
-  bytes?: string;
-  proof?: ProofAmino;
+  index: number;
+  bytes: string;
+  proof: ProofAmino;
 }
 export interface PartAminoMsg {
   type: "/tendermint.types.Part";
   value: PartAmino;
-}
-export interface PartSDKType {
-  index: number;
-  bytes: Uint8Array;
-  proof: ProofSDKType;
 }
 /** BlockID */
 export interface BlockID {
@@ -153,17 +98,12 @@ export interface BlockIDProtoMsg {
 }
 /** BlockID */
 export interface BlockIDAmino {
-  hash?: string;
-  part_set_header?: PartSetHeaderAmino;
+  hash: string;
+  part_set_header: PartSetHeaderAmino;
 }
 export interface BlockIDAminoMsg {
   type: "/tendermint.types.BlockID";
   value: BlockIDAmino;
-}
-/** BlockID */
-export interface BlockIDSDKType {
-  hash: Uint8Array;
-  part_set_header: PartSetHeaderSDKType;
 }
 /** Header defines the structure of a block header. */
 export interface Header {
@@ -176,6 +116,7 @@ export interface Header {
   lastBlockId: BlockID;
   /** hashes of block data */
   lastCommitHash: Uint8Array;
+  /** transactions */
   dataHash: Uint8Array;
   /** hashes from the app output from the prev block */
   validatorsHash: Uint8Array;
@@ -185,6 +126,7 @@ export interface Header {
   consensusHash: Uint8Array;
   /** state after txs from the previous block */
   appHash: Uint8Array;
+  /** root hash of all results from the txs from the previous block */
   lastResultsHash: Uint8Array;
   /** consensus info */
   evidenceHash: Uint8Array;
@@ -198,49 +140,34 @@ export interface HeaderProtoMsg {
 /** Header defines the structure of a block header. */
 export interface HeaderAmino {
   /** basic block info */
-  version?: ConsensusAmino;
-  chain_id?: string;
-  height?: string;
-  time?: string;
+  version: ConsensusAmino;
+  chain_id: string;
+  height: string;
+  time: string;
   /** prev block info */
-  last_block_id?: BlockIDAmino;
+  last_block_id: BlockIDAmino;
   /** hashes of block data */
-  last_commit_hash?: string;
-  data_hash?: string;
+  last_commit_hash: string;
+  /** transactions */
+  data_hash: string;
   /** hashes from the app output from the prev block */
-  validators_hash?: string;
+  validators_hash: string;
   /** validators for the next block */
-  next_validators_hash?: string;
+  next_validators_hash: string;
   /** consensus params for current block */
-  consensus_hash?: string;
+  consensus_hash: string;
   /** state after txs from the previous block */
-  app_hash?: string;
-  last_results_hash?: string;
+  app_hash: string;
+  /** root hash of all results from the txs from the previous block */
+  last_results_hash: string;
   /** consensus info */
-  evidence_hash?: string;
+  evidence_hash: string;
   /** original proposer of the block */
-  proposer_address?: string;
+  proposer_address: string;
 }
 export interface HeaderAminoMsg {
   type: "/tendermint.types.Header";
   value: HeaderAmino;
-}
-/** Header defines the structure of a block header. */
-export interface HeaderSDKType {
-  version: ConsensusSDKType;
-  chain_id: string;
-  height: bigint;
-  time: Date;
-  last_block_id: BlockIDSDKType;
-  last_commit_hash: Uint8Array;
-  data_hash: Uint8Array;
-  validators_hash: Uint8Array;
-  next_validators_hash: Uint8Array;
-  consensus_hash: Uint8Array;
-  app_hash: Uint8Array;
-  last_results_hash: Uint8Array;
-  evidence_hash: Uint8Array;
-  proposer_address: Uint8Array;
 }
 /** Data contains the set of transactions included in the block */
 export interface Data {
@@ -262,65 +189,79 @@ export interface DataAmino {
    * NOTE: not all txs here are valid.  We're just agreeing on the order first.
    * This means that block.AppHash does not include these txs.
    */
-  txs?: string[];
+  txs: string[];
 }
 export interface DataAminoMsg {
   type: "/tendermint.types.Data";
   value: DataAmino;
 }
-/** Data contains the set of transactions included in the block */
-export interface DataSDKType {
-  txs: Uint8Array[];
-}
 /**
- * Vote represents a prevote, precommit, or commit vote from validators for
+ * Vote represents a prevote or precommit vote from validators for
  * consensus.
  */
 export interface Vote {
   type: SignedMsgType;
   height: bigint;
   round: number;
+  /** zero if vote is nil. */
   blockId: BlockID;
   timestamp: Date;
   validatorAddress: Uint8Array;
   validatorIndex: number;
+  /**
+   * Vote signature by the validator if they participated in consensus for the
+   * associated block.
+   */
   signature: Uint8Array;
+  /**
+   * Vote extension provided by the application. Only valid for precommit
+   * messages.
+   */
+  extension: Uint8Array;
+  /**
+   * Vote extension signature by the validator if they participated in
+   * consensus for the associated block.
+   * Only valid for precommit messages.
+   */
+  extensionSignature: Uint8Array;
 }
 export interface VoteProtoMsg {
   typeUrl: "/tendermint.types.Vote";
   value: Uint8Array;
 }
 /**
- * Vote represents a prevote, precommit, or commit vote from validators for
+ * Vote represents a prevote or precommit vote from validators for
  * consensus.
  */
 export interface VoteAmino {
-  type?: SignedMsgType;
-  height?: string;
-  round?: number;
-  block_id?: BlockIDAmino;
-  timestamp?: string;
-  validator_address?: string;
-  validator_index?: number;
-  signature?: string;
+  type: SignedMsgType;
+  height: string;
+  round: number;
+  /** zero if vote is nil. */
+  block_id: BlockIDAmino;
+  timestamp: string;
+  validator_address: string;
+  validator_index: number;
+  /**
+   * Vote signature by the validator if they participated in consensus for the
+   * associated block.
+   */
+  signature: string;
+  /**
+   * Vote extension provided by the application. Only valid for precommit
+   * messages.
+   */
+  extension: string;
+  /**
+   * Vote extension signature by the validator if they participated in
+   * consensus for the associated block.
+   * Only valid for precommit messages.
+   */
+  extension_signature: string;
 }
 export interface VoteAminoMsg {
   type: "/tendermint.types.Vote";
   value: VoteAmino;
-}
-/**
- * Vote represents a prevote, precommit, or commit vote from validators for
- * consensus.
- */
-export interface VoteSDKType {
-  type: SignedMsgType;
-  height: bigint;
-  round: number;
-  block_id: BlockIDSDKType;
-  timestamp: Date;
-  validator_address: Uint8Array;
-  validator_index: number;
-  signature: Uint8Array;
 }
 /** Commit contains the evidence that a block was committed by a set of validators. */
 export interface Commit {
@@ -335,21 +276,14 @@ export interface CommitProtoMsg {
 }
 /** Commit contains the evidence that a block was committed by a set of validators. */
 export interface CommitAmino {
-  height?: string;
-  round?: number;
-  block_id?: BlockIDAmino;
-  signatures?: CommitSigAmino[];
+  height: string;
+  round: number;
+  block_id: BlockIDAmino;
+  signatures: CommitSigAmino[];
 }
 export interface CommitAminoMsg {
   type: "/tendermint.types.Commit";
   value: CommitAmino;
-}
-/** Commit contains the evidence that a block was committed by a set of validators. */
-export interface CommitSDKType {
-  height: bigint;
-  round: number;
-  block_id: BlockIDSDKType;
-  signatures: CommitSigSDKType[];
 }
 /** CommitSig is a part of the Vote included in a Commit. */
 export interface CommitSig {
@@ -364,21 +298,72 @@ export interface CommitSigProtoMsg {
 }
 /** CommitSig is a part of the Vote included in a Commit. */
 export interface CommitSigAmino {
-  block_id_flag?: BlockIDFlag;
-  validator_address?: string;
-  timestamp?: string;
-  signature?: string;
+  block_id_flag: BlockIDFlag;
+  validator_address: string;
+  timestamp: string;
+  signature: string;
 }
 export interface CommitSigAminoMsg {
   type: "/tendermint.types.CommitSig";
   value: CommitSigAmino;
 }
-/** CommitSig is a part of the Vote included in a Commit. */
-export interface CommitSigSDKType {
-  block_id_flag: BlockIDFlag;
-  validator_address: Uint8Array;
+export interface ExtendedCommit {
+  height: bigint;
+  round: number;
+  blockId: BlockID;
+  extendedSignatures: ExtendedCommitSig[];
+}
+export interface ExtendedCommitProtoMsg {
+  typeUrl: "/tendermint.types.ExtendedCommit";
+  value: Uint8Array;
+}
+export interface ExtendedCommitAmino {
+  height: string;
+  round: number;
+  block_id: BlockIDAmino;
+  extended_signatures: ExtendedCommitSigAmino[];
+}
+export interface ExtendedCommitAminoMsg {
+  type: "/tendermint.types.ExtendedCommit";
+  value: ExtendedCommitAmino;
+}
+/**
+ * ExtendedCommitSig retains all the same fields as CommitSig but adds vote
+ * extension-related fields. We use two signatures to ensure backwards compatibility.
+ * That is the digest of the original signature is still the same in prior versions
+ */
+export interface ExtendedCommitSig {
+  blockIdFlag: BlockIDFlag;
+  validatorAddress: Uint8Array;
   timestamp: Date;
   signature: Uint8Array;
+  /** Vote extension data */
+  extension: Uint8Array;
+  /** Vote extension signature */
+  extensionSignature: Uint8Array;
+}
+export interface ExtendedCommitSigProtoMsg {
+  typeUrl: "/tendermint.types.ExtendedCommitSig";
+  value: Uint8Array;
+}
+/**
+ * ExtendedCommitSig retains all the same fields as CommitSig but adds vote
+ * extension-related fields. We use two signatures to ensure backwards compatibility.
+ * That is the digest of the original signature is still the same in prior versions
+ */
+export interface ExtendedCommitSigAmino {
+  block_id_flag: BlockIDFlag;
+  validator_address: string;
+  timestamp: string;
+  signature: string;
+  /** Vote extension data */
+  extension: string;
+  /** Vote extension signature */
+  extension_signature: string;
+}
+export interface ExtendedCommitSigAminoMsg {
+  type: "/tendermint.types.ExtendedCommitSig";
+  value: ExtendedCommitSigAmino;
 }
 export interface Proposal {
   type: SignedMsgType;
@@ -394,26 +379,17 @@ export interface ProposalProtoMsg {
   value: Uint8Array;
 }
 export interface ProposalAmino {
-  type?: SignedMsgType;
-  height?: string;
-  round?: number;
-  pol_round?: number;
-  block_id?: BlockIDAmino;
-  timestamp?: string;
-  signature?: string;
+  type: SignedMsgType;
+  height: string;
+  round: number;
+  pol_round: number;
+  block_id: BlockIDAmino;
+  timestamp: string;
+  signature: string;
 }
 export interface ProposalAminoMsg {
   type: "/tendermint.types.Proposal";
   value: ProposalAmino;
-}
-export interface ProposalSDKType {
-  type: SignedMsgType;
-  height: bigint;
-  round: number;
-  pol_round: number;
-  block_id: BlockIDSDKType;
-  timestamp: Date;
-  signature: Uint8Array;
 }
 export interface SignedHeader {
   header?: Header;
@@ -431,10 +407,6 @@ export interface SignedHeaderAminoMsg {
   type: "/tendermint.types.SignedHeader";
   value: SignedHeaderAmino;
 }
-export interface SignedHeaderSDKType {
-  header?: HeaderSDKType;
-  commit?: CommitSDKType;
-}
 export interface LightBlock {
   signedHeader?: SignedHeader;
   validatorSet?: ValidatorSet;
@@ -451,10 +423,6 @@ export interface LightBlockAminoMsg {
   type: "/tendermint.types.LightBlock";
   value: LightBlockAmino;
 }
-export interface LightBlockSDKType {
-  signed_header?: SignedHeaderSDKType;
-  validator_set?: ValidatorSetSDKType;
-}
 export interface BlockMeta {
   blockId: BlockID;
   blockSize: bigint;
@@ -466,20 +434,14 @@ export interface BlockMetaProtoMsg {
   value: Uint8Array;
 }
 export interface BlockMetaAmino {
-  block_id?: BlockIDAmino;
-  block_size?: string;
-  header?: HeaderAmino;
-  num_txs?: string;
+  block_id: BlockIDAmino;
+  block_size: string;
+  header: HeaderAmino;
+  num_txs: string;
 }
 export interface BlockMetaAminoMsg {
   type: "/tendermint.types.BlockMeta";
   value: BlockMetaAmino;
-}
-export interface BlockMetaSDKType {
-  block_id: BlockIDSDKType;
-  block_size: bigint;
-  header: HeaderSDKType;
-  num_txs: bigint;
 }
 /** TxProof represents a Merkle proof of the presence of a transaction in the Merkle tree. */
 export interface TxProof {
@@ -493,19 +455,13 @@ export interface TxProofProtoMsg {
 }
 /** TxProof represents a Merkle proof of the presence of a transaction in the Merkle tree. */
 export interface TxProofAmino {
-  root_hash?: string;
-  data?: string;
+  root_hash: string;
+  data: string;
   proof?: ProofAmino;
 }
 export interface TxProofAminoMsg {
   type: "/tendermint.types.TxProof";
   value: TxProofAmino;
-}
-/** TxProof represents a Merkle proof of the presence of a transaction in the Merkle tree. */
-export interface TxProofSDKType {
-  root_hash: Uint8Array;
-  data: Uint8Array;
-  proof?: ProofSDKType;
 }
 function createBasePartSetHeader(): PartSetHeader {
   return {
@@ -515,6 +471,12 @@ function createBasePartSetHeader(): PartSetHeader {
 }
 export const PartSetHeader = {
   typeUrl: "/tendermint.types.PartSetHeader",
+  is(o: any): o is PartSetHeader {
+    return o && (o.$typeUrl === PartSetHeader.typeUrl || typeof o.total === "number" && (o.hash instanceof Uint8Array || typeof o.hash === "string"));
+  },
+  isAmino(o: any): o is PartSetHeaderAmino {
+    return o && (o.$typeUrl === PartSetHeader.typeUrl || typeof o.total === "number" && (o.hash instanceof Uint8Array || typeof o.hash === "string"));
+  },
   encode(message: PartSetHeader, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.total !== 0) {
       writer.uint32(8).uint32(message.total);
@@ -582,6 +544,7 @@ export const PartSetHeader = {
     };
   }
 };
+GlobalDecoderRegistry.register(PartSetHeader.typeUrl, PartSetHeader);
 function createBasePart(): Part {
   return {
     index: 0,
@@ -591,6 +554,12 @@ function createBasePart(): Part {
 }
 export const Part = {
   typeUrl: "/tendermint.types.Part",
+  is(o: any): o is Part {
+    return o && (o.$typeUrl === Part.typeUrl || typeof o.index === "number" && (o.bytes instanceof Uint8Array || typeof o.bytes === "string") && Proof.is(o.proof));
+  },
+  isAmino(o: any): o is PartAmino {
+    return o && (o.$typeUrl === Part.typeUrl || typeof o.index === "number" && (o.bytes instanceof Uint8Array || typeof o.bytes === "string") && Proof.isAmino(o.proof));
+  },
   encode(message: Part, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.index !== 0) {
       writer.uint32(8).uint32(message.index);
@@ -669,6 +638,7 @@ export const Part = {
     };
   }
 };
+GlobalDecoderRegistry.register(Part.typeUrl, Part);
 function createBaseBlockID(): BlockID {
   return {
     hash: new Uint8Array(),
@@ -677,6 +647,12 @@ function createBaseBlockID(): BlockID {
 }
 export const BlockID = {
   typeUrl: "/tendermint.types.BlockID",
+  is(o: any): o is BlockID {
+    return o && (o.$typeUrl === BlockID.typeUrl || (o.hash instanceof Uint8Array || typeof o.hash === "string") && PartSetHeader.is(o.partSetHeader));
+  },
+  isAmino(o: any): o is BlockIDAmino {
+    return o && (o.$typeUrl === BlockID.typeUrl || (o.hash instanceof Uint8Array || typeof o.hash === "string") && PartSetHeader.isAmino(o.part_set_header));
+  },
   encode(message: BlockID, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.hash.length !== 0) {
       writer.uint32(10).bytes(message.hash);
@@ -744,6 +720,7 @@ export const BlockID = {
     };
   }
 };
+GlobalDecoderRegistry.register(BlockID.typeUrl, BlockID);
 function createBaseHeader(): Header {
   return {
     version: Consensus.fromPartial({}),
@@ -764,6 +741,12 @@ function createBaseHeader(): Header {
 }
 export const Header = {
   typeUrl: "/tendermint.types.Header",
+  is(o: any): o is Header {
+    return o && (o.$typeUrl === Header.typeUrl || Consensus.is(o.version) && typeof o.chainId === "string" && typeof o.height === "bigint" && Timestamp.is(o.time) && BlockID.is(o.lastBlockId) && (o.lastCommitHash instanceof Uint8Array || typeof o.lastCommitHash === "string") && (o.dataHash instanceof Uint8Array || typeof o.dataHash === "string") && (o.validatorsHash instanceof Uint8Array || typeof o.validatorsHash === "string") && (o.nextValidatorsHash instanceof Uint8Array || typeof o.nextValidatorsHash === "string") && (o.consensusHash instanceof Uint8Array || typeof o.consensusHash === "string") && (o.appHash instanceof Uint8Array || typeof o.appHash === "string") && (o.lastResultsHash instanceof Uint8Array || typeof o.lastResultsHash === "string") && (o.evidenceHash instanceof Uint8Array || typeof o.evidenceHash === "string") && (o.proposerAddress instanceof Uint8Array || typeof o.proposerAddress === "string"));
+  },
+  isAmino(o: any): o is HeaderAmino {
+    return o && (o.$typeUrl === Header.typeUrl || Consensus.isAmino(o.version) && typeof o.chain_id === "string" && typeof o.height === "bigint" && Timestamp.isAmino(o.time) && BlockID.isAmino(o.last_block_id) && (o.last_commit_hash instanceof Uint8Array || typeof o.last_commit_hash === "string") && (o.data_hash instanceof Uint8Array || typeof o.data_hash === "string") && (o.validators_hash instanceof Uint8Array || typeof o.validators_hash === "string") && (o.next_validators_hash instanceof Uint8Array || typeof o.next_validators_hash === "string") && (o.consensus_hash instanceof Uint8Array || typeof o.consensus_hash === "string") && (o.app_hash instanceof Uint8Array || typeof o.app_hash === "string") && (o.last_results_hash instanceof Uint8Array || typeof o.last_results_hash === "string") && (o.evidence_hash instanceof Uint8Array || typeof o.evidence_hash === "string") && (o.proposer_address instanceof Uint8Array || typeof o.proposer_address === "string"));
+  },
   encode(message: Header, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.version !== undefined) {
       Consensus.encode(message.version, writer.uint32(10).fork()).ldelim();
@@ -963,6 +946,7 @@ export const Header = {
     };
   }
 };
+GlobalDecoderRegistry.register(Header.typeUrl, Header);
 function createBaseData(): Data {
   return {
     txs: []
@@ -970,6 +954,12 @@ function createBaseData(): Data {
 }
 export const Data = {
   typeUrl: "/tendermint.types.Data",
+  is(o: any): o is Data {
+    return o && (o.$typeUrl === Data.typeUrl || Array.isArray(o.txs) && (!o.txs.length || o.txs[0] instanceof Uint8Array || typeof o.txs[0] === "string"));
+  },
+  isAmino(o: any): o is DataAmino {
+    return o && (o.$typeUrl === Data.typeUrl || Array.isArray(o.txs) && (!o.txs.length || o.txs[0] instanceof Uint8Array || typeof o.txs[0] === "string"));
+  },
   encode(message: Data, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     for (const v of message.txs) {
       writer.uint32(10).bytes(v!);
@@ -1028,6 +1018,7 @@ export const Data = {
     };
   }
 };
+GlobalDecoderRegistry.register(Data.typeUrl, Data);
 function createBaseVote(): Vote {
   return {
     type: 0,
@@ -1037,11 +1028,19 @@ function createBaseVote(): Vote {
     timestamp: new Date(),
     validatorAddress: new Uint8Array(),
     validatorIndex: 0,
-    signature: new Uint8Array()
+    signature: new Uint8Array(),
+    extension: new Uint8Array(),
+    extensionSignature: new Uint8Array()
   };
 }
 export const Vote = {
   typeUrl: "/tendermint.types.Vote",
+  is(o: any): o is Vote {
+    return o && (o.$typeUrl === Vote.typeUrl || isSet(o.type) && typeof o.height === "bigint" && typeof o.round === "number" && BlockID.is(o.blockId) && Timestamp.is(o.timestamp) && (o.validatorAddress instanceof Uint8Array || typeof o.validatorAddress === "string") && typeof o.validatorIndex === "number" && (o.signature instanceof Uint8Array || typeof o.signature === "string") && (o.extension instanceof Uint8Array || typeof o.extension === "string") && (o.extensionSignature instanceof Uint8Array || typeof o.extensionSignature === "string"));
+  },
+  isAmino(o: any): o is VoteAmino {
+    return o && (o.$typeUrl === Vote.typeUrl || isSet(o.type) && typeof o.height === "bigint" && typeof o.round === "number" && BlockID.isAmino(o.block_id) && Timestamp.isAmino(o.timestamp) && (o.validator_address instanceof Uint8Array || typeof o.validator_address === "string") && typeof o.validator_index === "number" && (o.signature instanceof Uint8Array || typeof o.signature === "string") && (o.extension instanceof Uint8Array || typeof o.extension === "string") && (o.extension_signature instanceof Uint8Array || typeof o.extension_signature === "string"));
+  },
   encode(message: Vote, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.type !== 0) {
       writer.uint32(8).int32(message.type);
@@ -1067,6 +1066,12 @@ export const Vote = {
     if (message.signature.length !== 0) {
       writer.uint32(66).bytes(message.signature);
     }
+    if (message.extension.length !== 0) {
+      writer.uint32(74).bytes(message.extension);
+    }
+    if (message.extensionSignature.length !== 0) {
+      writer.uint32(82).bytes(message.extensionSignature);
+    }
     return writer;
   },
   decode(input: BinaryReader | Uint8Array, length?: number): Vote {
@@ -1077,7 +1082,7 @@ export const Vote = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.type = (reader.int32() as any);
+          message.type = reader.int32() as any;
           break;
         case 2:
           message.height = reader.int64();
@@ -1100,6 +1105,12 @@ export const Vote = {
         case 8:
           message.signature = reader.bytes();
           break;
+        case 9:
+          message.extension = reader.bytes();
+          break;
+        case 10:
+          message.extensionSignature = reader.bytes();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -1117,6 +1128,8 @@ export const Vote = {
     message.validatorAddress = object.validatorAddress ?? new Uint8Array();
     message.validatorIndex = object.validatorIndex ?? 0;
     message.signature = object.signature ?? new Uint8Array();
+    message.extension = object.extension ?? new Uint8Array();
+    message.extensionSignature = object.extensionSignature ?? new Uint8Array();
     return message;
   },
   fromAmino(object: VoteAmino): Vote {
@@ -1145,6 +1158,12 @@ export const Vote = {
     if (object.signature !== undefined && object.signature !== null) {
       message.signature = bytesFromBase64(object.signature);
     }
+    if (object.extension !== undefined && object.extension !== null) {
+      message.extension = bytesFromBase64(object.extension);
+    }
+    if (object.extension_signature !== undefined && object.extension_signature !== null) {
+      message.extensionSignature = bytesFromBase64(object.extension_signature);
+    }
     return message;
   },
   toAmino(message: Vote): VoteAmino {
@@ -1157,6 +1176,8 @@ export const Vote = {
     obj.validator_address = message.validatorAddress ? base64FromBytes(message.validatorAddress) : undefined;
     obj.validator_index = message.validatorIndex === 0 ? undefined : message.validatorIndex;
     obj.signature = message.signature ? base64FromBytes(message.signature) : undefined;
+    obj.extension = message.extension ? base64FromBytes(message.extension) : undefined;
+    obj.extension_signature = message.extensionSignature ? base64FromBytes(message.extensionSignature) : undefined;
     return obj;
   },
   fromAminoMsg(object: VoteAminoMsg): Vote {
@@ -1175,6 +1196,7 @@ export const Vote = {
     };
   }
 };
+GlobalDecoderRegistry.register(Vote.typeUrl, Vote);
 function createBaseCommit(): Commit {
   return {
     height: BigInt(0),
@@ -1185,6 +1207,12 @@ function createBaseCommit(): Commit {
 }
 export const Commit = {
   typeUrl: "/tendermint.types.Commit",
+  is(o: any): o is Commit {
+    return o && (o.$typeUrl === Commit.typeUrl || typeof o.height === "bigint" && typeof o.round === "number" && BlockID.is(o.blockId) && Array.isArray(o.signatures) && (!o.signatures.length || CommitSig.is(o.signatures[0])));
+  },
+  isAmino(o: any): o is CommitAmino {
+    return o && (o.$typeUrl === Commit.typeUrl || typeof o.height === "bigint" && typeof o.round === "number" && BlockID.isAmino(o.block_id) && Array.isArray(o.signatures) && (!o.signatures.length || CommitSig.isAmino(o.signatures[0])));
+  },
   encode(message: Commit, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.height !== BigInt(0)) {
       writer.uint32(8).int64(message.height);
@@ -1276,6 +1304,7 @@ export const Commit = {
     };
   }
 };
+GlobalDecoderRegistry.register(Commit.typeUrl, Commit);
 function createBaseCommitSig(): CommitSig {
   return {
     blockIdFlag: 0,
@@ -1286,6 +1315,12 @@ function createBaseCommitSig(): CommitSig {
 }
 export const CommitSig = {
   typeUrl: "/tendermint.types.CommitSig",
+  is(o: any): o is CommitSig {
+    return o && (o.$typeUrl === CommitSig.typeUrl || isSet(o.blockIdFlag) && (o.validatorAddress instanceof Uint8Array || typeof o.validatorAddress === "string") && Timestamp.is(o.timestamp) && (o.signature instanceof Uint8Array || typeof o.signature === "string"));
+  },
+  isAmino(o: any): o is CommitSigAmino {
+    return o && (o.$typeUrl === CommitSig.typeUrl || isSet(o.block_id_flag) && (o.validator_address instanceof Uint8Array || typeof o.validator_address === "string") && Timestamp.isAmino(o.timestamp) && (o.signature instanceof Uint8Array || typeof o.signature === "string"));
+  },
   encode(message: CommitSig, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.blockIdFlag !== 0) {
       writer.uint32(8).int32(message.blockIdFlag);
@@ -1309,7 +1344,7 @@ export const CommitSig = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.blockIdFlag = (reader.int32() as any);
+          message.blockIdFlag = reader.int32() as any;
           break;
         case 2:
           message.validatorAddress = reader.bytes();
@@ -1375,6 +1410,245 @@ export const CommitSig = {
     };
   }
 };
+GlobalDecoderRegistry.register(CommitSig.typeUrl, CommitSig);
+function createBaseExtendedCommit(): ExtendedCommit {
+  return {
+    height: BigInt(0),
+    round: 0,
+    blockId: BlockID.fromPartial({}),
+    extendedSignatures: []
+  };
+}
+export const ExtendedCommit = {
+  typeUrl: "/tendermint.types.ExtendedCommit",
+  is(o: any): o is ExtendedCommit {
+    return o && (o.$typeUrl === ExtendedCommit.typeUrl || typeof o.height === "bigint" && typeof o.round === "number" && BlockID.is(o.blockId) && Array.isArray(o.extendedSignatures) && (!o.extendedSignatures.length || ExtendedCommitSig.is(o.extendedSignatures[0])));
+  },
+  isAmino(o: any): o is ExtendedCommitAmino {
+    return o && (o.$typeUrl === ExtendedCommit.typeUrl || typeof o.height === "bigint" && typeof o.round === "number" && BlockID.isAmino(o.block_id) && Array.isArray(o.extended_signatures) && (!o.extended_signatures.length || ExtendedCommitSig.isAmino(o.extended_signatures[0])));
+  },
+  encode(message: ExtendedCommit, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
+    if (message.height !== BigInt(0)) {
+      writer.uint32(8).int64(message.height);
+    }
+    if (message.round !== 0) {
+      writer.uint32(16).int32(message.round);
+    }
+    if (message.blockId !== undefined) {
+      BlockID.encode(message.blockId, writer.uint32(26).fork()).ldelim();
+    }
+    for (const v of message.extendedSignatures) {
+      ExtendedCommitSig.encode(v!, writer.uint32(34).fork()).ldelim();
+    }
+    return writer;
+  },
+  decode(input: BinaryReader | Uint8Array, length?: number): ExtendedCommit {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseExtendedCommit();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.height = reader.int64();
+          break;
+        case 2:
+          message.round = reader.int32();
+          break;
+        case 3:
+          message.blockId = BlockID.decode(reader, reader.uint32());
+          break;
+        case 4:
+          message.extendedSignatures.push(ExtendedCommitSig.decode(reader, reader.uint32()));
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+  fromPartial(object: DeepPartial<ExtendedCommit>): ExtendedCommit {
+    const message = createBaseExtendedCommit();
+    message.height = object.height !== undefined && object.height !== null ? BigInt(object.height.toString()) : BigInt(0);
+    message.round = object.round ?? 0;
+    message.blockId = object.blockId !== undefined && object.blockId !== null ? BlockID.fromPartial(object.blockId) : undefined;
+    message.extendedSignatures = object.extendedSignatures?.map(e => ExtendedCommitSig.fromPartial(e)) || [];
+    return message;
+  },
+  fromAmino(object: ExtendedCommitAmino): ExtendedCommit {
+    const message = createBaseExtendedCommit();
+    if (object.height !== undefined && object.height !== null) {
+      message.height = BigInt(object.height);
+    }
+    if (object.round !== undefined && object.round !== null) {
+      message.round = object.round;
+    }
+    if (object.block_id !== undefined && object.block_id !== null) {
+      message.blockId = BlockID.fromAmino(object.block_id);
+    }
+    message.extendedSignatures = object.extended_signatures?.map(e => ExtendedCommitSig.fromAmino(e)) || [];
+    return message;
+  },
+  toAmino(message: ExtendedCommit): ExtendedCommitAmino {
+    const obj: any = {};
+    obj.height = message.height !== BigInt(0) ? message.height.toString() : undefined;
+    obj.round = message.round === 0 ? undefined : message.round;
+    obj.block_id = message.blockId ? BlockID.toAmino(message.blockId) : undefined;
+    if (message.extendedSignatures) {
+      obj.extended_signatures = message.extendedSignatures.map(e => e ? ExtendedCommitSig.toAmino(e) : undefined);
+    } else {
+      obj.extended_signatures = message.extendedSignatures;
+    }
+    return obj;
+  },
+  fromAminoMsg(object: ExtendedCommitAminoMsg): ExtendedCommit {
+    return ExtendedCommit.fromAmino(object.value);
+  },
+  fromProtoMsg(message: ExtendedCommitProtoMsg): ExtendedCommit {
+    return ExtendedCommit.decode(message.value);
+  },
+  toProto(message: ExtendedCommit): Uint8Array {
+    return ExtendedCommit.encode(message).finish();
+  },
+  toProtoMsg(message: ExtendedCommit): ExtendedCommitProtoMsg {
+    return {
+      typeUrl: "/tendermint.types.ExtendedCommit",
+      value: ExtendedCommit.encode(message).finish()
+    };
+  }
+};
+GlobalDecoderRegistry.register(ExtendedCommit.typeUrl, ExtendedCommit);
+function createBaseExtendedCommitSig(): ExtendedCommitSig {
+  return {
+    blockIdFlag: 0,
+    validatorAddress: new Uint8Array(),
+    timestamp: new Date(),
+    signature: new Uint8Array(),
+    extension: new Uint8Array(),
+    extensionSignature: new Uint8Array()
+  };
+}
+export const ExtendedCommitSig = {
+  typeUrl: "/tendermint.types.ExtendedCommitSig",
+  is(o: any): o is ExtendedCommitSig {
+    return o && (o.$typeUrl === ExtendedCommitSig.typeUrl || isSet(o.blockIdFlag) && (o.validatorAddress instanceof Uint8Array || typeof o.validatorAddress === "string") && Timestamp.is(o.timestamp) && (o.signature instanceof Uint8Array || typeof o.signature === "string") && (o.extension instanceof Uint8Array || typeof o.extension === "string") && (o.extensionSignature instanceof Uint8Array || typeof o.extensionSignature === "string"));
+  },
+  isAmino(o: any): o is ExtendedCommitSigAmino {
+    return o && (o.$typeUrl === ExtendedCommitSig.typeUrl || isSet(o.block_id_flag) && (o.validator_address instanceof Uint8Array || typeof o.validator_address === "string") && Timestamp.isAmino(o.timestamp) && (o.signature instanceof Uint8Array || typeof o.signature === "string") && (o.extension instanceof Uint8Array || typeof o.extension === "string") && (o.extension_signature instanceof Uint8Array || typeof o.extension_signature === "string"));
+  },
+  encode(message: ExtendedCommitSig, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
+    if (message.blockIdFlag !== 0) {
+      writer.uint32(8).int32(message.blockIdFlag);
+    }
+    if (message.validatorAddress.length !== 0) {
+      writer.uint32(18).bytes(message.validatorAddress);
+    }
+    if (message.timestamp !== undefined) {
+      Timestamp.encode(toTimestamp(message.timestamp), writer.uint32(26).fork()).ldelim();
+    }
+    if (message.signature.length !== 0) {
+      writer.uint32(34).bytes(message.signature);
+    }
+    if (message.extension.length !== 0) {
+      writer.uint32(42).bytes(message.extension);
+    }
+    if (message.extensionSignature.length !== 0) {
+      writer.uint32(50).bytes(message.extensionSignature);
+    }
+    return writer;
+  },
+  decode(input: BinaryReader | Uint8Array, length?: number): ExtendedCommitSig {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseExtendedCommitSig();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.blockIdFlag = reader.int32() as any;
+          break;
+        case 2:
+          message.validatorAddress = reader.bytes();
+          break;
+        case 3:
+          message.timestamp = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          break;
+        case 4:
+          message.signature = reader.bytes();
+          break;
+        case 5:
+          message.extension = reader.bytes();
+          break;
+        case 6:
+          message.extensionSignature = reader.bytes();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+  fromPartial(object: DeepPartial<ExtendedCommitSig>): ExtendedCommitSig {
+    const message = createBaseExtendedCommitSig();
+    message.blockIdFlag = object.blockIdFlag ?? 0;
+    message.validatorAddress = object.validatorAddress ?? new Uint8Array();
+    message.timestamp = object.timestamp ?? undefined;
+    message.signature = object.signature ?? new Uint8Array();
+    message.extension = object.extension ?? new Uint8Array();
+    message.extensionSignature = object.extensionSignature ?? new Uint8Array();
+    return message;
+  },
+  fromAmino(object: ExtendedCommitSigAmino): ExtendedCommitSig {
+    const message = createBaseExtendedCommitSig();
+    if (object.block_id_flag !== undefined && object.block_id_flag !== null) {
+      message.blockIdFlag = object.block_id_flag;
+    }
+    if (object.validator_address !== undefined && object.validator_address !== null) {
+      message.validatorAddress = bytesFromBase64(object.validator_address);
+    }
+    if (object.timestamp !== undefined && object.timestamp !== null) {
+      message.timestamp = fromTimestamp(Timestamp.fromAmino(object.timestamp));
+    }
+    if (object.signature !== undefined && object.signature !== null) {
+      message.signature = bytesFromBase64(object.signature);
+    }
+    if (object.extension !== undefined && object.extension !== null) {
+      message.extension = bytesFromBase64(object.extension);
+    }
+    if (object.extension_signature !== undefined && object.extension_signature !== null) {
+      message.extensionSignature = bytesFromBase64(object.extension_signature);
+    }
+    return message;
+  },
+  toAmino(message: ExtendedCommitSig): ExtendedCommitSigAmino {
+    const obj: any = {};
+    obj.block_id_flag = message.blockIdFlag === 0 ? undefined : message.blockIdFlag;
+    obj.validator_address = message.validatorAddress ? base64FromBytes(message.validatorAddress) : undefined;
+    obj.timestamp = message.timestamp ? Timestamp.toAmino(toTimestamp(message.timestamp)) : undefined;
+    obj.signature = message.signature ? base64FromBytes(message.signature) : undefined;
+    obj.extension = message.extension ? base64FromBytes(message.extension) : undefined;
+    obj.extension_signature = message.extensionSignature ? base64FromBytes(message.extensionSignature) : undefined;
+    return obj;
+  },
+  fromAminoMsg(object: ExtendedCommitSigAminoMsg): ExtendedCommitSig {
+    return ExtendedCommitSig.fromAmino(object.value);
+  },
+  fromProtoMsg(message: ExtendedCommitSigProtoMsg): ExtendedCommitSig {
+    return ExtendedCommitSig.decode(message.value);
+  },
+  toProto(message: ExtendedCommitSig): Uint8Array {
+    return ExtendedCommitSig.encode(message).finish();
+  },
+  toProtoMsg(message: ExtendedCommitSig): ExtendedCommitSigProtoMsg {
+    return {
+      typeUrl: "/tendermint.types.ExtendedCommitSig",
+      value: ExtendedCommitSig.encode(message).finish()
+    };
+  }
+};
+GlobalDecoderRegistry.register(ExtendedCommitSig.typeUrl, ExtendedCommitSig);
 function createBaseProposal(): Proposal {
   return {
     type: 0,
@@ -1388,6 +1662,12 @@ function createBaseProposal(): Proposal {
 }
 export const Proposal = {
   typeUrl: "/tendermint.types.Proposal",
+  is(o: any): o is Proposal {
+    return o && (o.$typeUrl === Proposal.typeUrl || isSet(o.type) && typeof o.height === "bigint" && typeof o.round === "number" && typeof o.polRound === "number" && BlockID.is(o.blockId) && Timestamp.is(o.timestamp) && (o.signature instanceof Uint8Array || typeof o.signature === "string"));
+  },
+  isAmino(o: any): o is ProposalAmino {
+    return o && (o.$typeUrl === Proposal.typeUrl || isSet(o.type) && typeof o.height === "bigint" && typeof o.round === "number" && typeof o.pol_round === "number" && BlockID.isAmino(o.block_id) && Timestamp.isAmino(o.timestamp) && (o.signature instanceof Uint8Array || typeof o.signature === "string"));
+  },
   encode(message: Proposal, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.type !== 0) {
       writer.uint32(8).int32(message.type);
@@ -1420,7 +1700,7 @@ export const Proposal = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.type = (reader.int32() as any);
+          message.type = reader.int32() as any;
           break;
         case 2:
           message.height = reader.int64();
@@ -1510,6 +1790,7 @@ export const Proposal = {
     };
   }
 };
+GlobalDecoderRegistry.register(Proposal.typeUrl, Proposal);
 function createBaseSignedHeader(): SignedHeader {
   return {
     header: undefined,
@@ -1518,6 +1799,12 @@ function createBaseSignedHeader(): SignedHeader {
 }
 export const SignedHeader = {
   typeUrl: "/tendermint.types.SignedHeader",
+  is(o: any): o is SignedHeader {
+    return o && o.$typeUrl === SignedHeader.typeUrl;
+  },
+  isAmino(o: any): o is SignedHeaderAmino {
+    return o && o.$typeUrl === SignedHeader.typeUrl;
+  },
   encode(message: SignedHeader, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.header !== undefined) {
       Header.encode(message.header, writer.uint32(10).fork()).ldelim();
@@ -1585,6 +1872,7 @@ export const SignedHeader = {
     };
   }
 };
+GlobalDecoderRegistry.register(SignedHeader.typeUrl, SignedHeader);
 function createBaseLightBlock(): LightBlock {
   return {
     signedHeader: undefined,
@@ -1593,6 +1881,12 @@ function createBaseLightBlock(): LightBlock {
 }
 export const LightBlock = {
   typeUrl: "/tendermint.types.LightBlock",
+  is(o: any): o is LightBlock {
+    return o && o.$typeUrl === LightBlock.typeUrl;
+  },
+  isAmino(o: any): o is LightBlockAmino {
+    return o && o.$typeUrl === LightBlock.typeUrl;
+  },
   encode(message: LightBlock, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.signedHeader !== undefined) {
       SignedHeader.encode(message.signedHeader, writer.uint32(10).fork()).ldelim();
@@ -1660,6 +1954,7 @@ export const LightBlock = {
     };
   }
 };
+GlobalDecoderRegistry.register(LightBlock.typeUrl, LightBlock);
 function createBaseBlockMeta(): BlockMeta {
   return {
     blockId: BlockID.fromPartial({}),
@@ -1670,6 +1965,12 @@ function createBaseBlockMeta(): BlockMeta {
 }
 export const BlockMeta = {
   typeUrl: "/tendermint.types.BlockMeta",
+  is(o: any): o is BlockMeta {
+    return o && (o.$typeUrl === BlockMeta.typeUrl || BlockID.is(o.blockId) && typeof o.blockSize === "bigint" && Header.is(o.header) && typeof o.numTxs === "bigint");
+  },
+  isAmino(o: any): o is BlockMetaAmino {
+    return o && (o.$typeUrl === BlockMeta.typeUrl || BlockID.isAmino(o.block_id) && typeof o.block_size === "bigint" && Header.isAmino(o.header) && typeof o.num_txs === "bigint");
+  },
   encode(message: BlockMeta, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.blockId !== undefined) {
       BlockID.encode(message.blockId, writer.uint32(10).fork()).ldelim();
@@ -1759,6 +2060,7 @@ export const BlockMeta = {
     };
   }
 };
+GlobalDecoderRegistry.register(BlockMeta.typeUrl, BlockMeta);
 function createBaseTxProof(): TxProof {
   return {
     rootHash: new Uint8Array(),
@@ -1768,6 +2070,12 @@ function createBaseTxProof(): TxProof {
 }
 export const TxProof = {
   typeUrl: "/tendermint.types.TxProof",
+  is(o: any): o is TxProof {
+    return o && (o.$typeUrl === TxProof.typeUrl || (o.rootHash instanceof Uint8Array || typeof o.rootHash === "string") && (o.data instanceof Uint8Array || typeof o.data === "string"));
+  },
+  isAmino(o: any): o is TxProofAmino {
+    return o && (o.$typeUrl === TxProof.typeUrl || (o.root_hash instanceof Uint8Array || typeof o.root_hash === "string") && (o.data instanceof Uint8Array || typeof o.data === "string"));
+  },
   encode(message: TxProof, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.rootHash.length !== 0) {
       writer.uint32(10).bytes(message.rootHash);
@@ -1846,3 +2154,4 @@ export const TxProof = {
     };
   }
 };
+GlobalDecoderRegistry.register(TxProof.typeUrl, TxProof);

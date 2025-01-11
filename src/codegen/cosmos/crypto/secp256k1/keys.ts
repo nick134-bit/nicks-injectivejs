@@ -1,5 +1,6 @@
 import { BinaryReader, BinaryWriter } from "../../../binary";
 import { DeepPartial, bytesFromBase64, base64FromBytes } from "../../../helpers";
+import { GlobalDecoderRegistry } from "../../../registry";
 /**
  * PubKey defines a secp256k1 public key
  * Key is the compressed form of the pubkey. The first byte depends is a 0x02 byte
@@ -22,21 +23,11 @@ export interface PubKeyProtoMsg {
  * This prefix is followed with the x-coordinate.
  */
 export interface PubKeyAmino {
-  key?: string;
+  key: string;
 }
 export interface PubKeyAminoMsg {
   type: "tendermint/PubKeySecp256k1";
   value: PubKeyAmino;
-}
-/**
- * PubKey defines a secp256k1 public key
- * Key is the compressed form of the pubkey. The first byte depends is a 0x02 byte
- * if the y-coordinate is the lexicographically largest of the two associated with
- * the x-coordinate. Otherwise the first byte is a 0x03.
- * This prefix is followed with the x-coordinate.
- */
-export interface PubKeySDKType {
-  key: Uint8Array;
 }
 /** PrivKey defines a secp256k1 private key. */
 export interface PrivKey {
@@ -48,15 +39,11 @@ export interface PrivKeyProtoMsg {
 }
 /** PrivKey defines a secp256k1 private key. */
 export interface PrivKeyAmino {
-  key?: string;
+  key: string;
 }
 export interface PrivKeyAminoMsg {
   type: "tendermint/PrivKeySecp256k1";
   value: PrivKeyAmino;
-}
-/** PrivKey defines a secp256k1 private key. */
-export interface PrivKeySDKType {
-  key: Uint8Array;
 }
 function createBasePubKey(): PubKey {
   return {
@@ -66,6 +53,12 @@ function createBasePubKey(): PubKey {
 export const PubKey = {
   typeUrl: "/cosmos.crypto.secp256k1.PubKey",
   aminoType: "tendermint/PubKeySecp256k1",
+  is(o: any): o is PubKey {
+    return o && (o.$typeUrl === PubKey.typeUrl || o.key instanceof Uint8Array || typeof o.key === "string");
+  },
+  isAmino(o: any): o is PubKeyAmino {
+    return o && (o.$typeUrl === PubKey.typeUrl || o.key instanceof Uint8Array || typeof o.key === "string");
+  },
   encode(message: PubKey, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.key.length !== 0) {
       writer.uint32(10).bytes(message.key);
@@ -128,6 +121,8 @@ export const PubKey = {
     };
   }
 };
+GlobalDecoderRegistry.register(PubKey.typeUrl, PubKey);
+GlobalDecoderRegistry.registerAminoProtoMapping(PubKey.aminoType, PubKey.typeUrl);
 function createBasePrivKey(): PrivKey {
   return {
     key: new Uint8Array()
@@ -136,6 +131,12 @@ function createBasePrivKey(): PrivKey {
 export const PrivKey = {
   typeUrl: "/cosmos.crypto.secp256k1.PrivKey",
   aminoType: "tendermint/PrivKeySecp256k1",
+  is(o: any): o is PrivKey {
+    return o && (o.$typeUrl === PrivKey.typeUrl || o.key instanceof Uint8Array || typeof o.key === "string");
+  },
+  isAmino(o: any): o is PrivKeyAmino {
+    return o && (o.$typeUrl === PrivKey.typeUrl || o.key instanceof Uint8Array || typeof o.key === "string");
+  },
   encode(message: PrivKey, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.key.length !== 0) {
       writer.uint32(10).bytes(message.key);
@@ -198,3 +199,5 @@ export const PrivKey = {
     };
   }
 };
+GlobalDecoderRegistry.register(PrivKey.typeUrl, PrivKey);
+GlobalDecoderRegistry.registerAminoProtoMapping(PrivKey.aminoType, PrivKey.typeUrl);

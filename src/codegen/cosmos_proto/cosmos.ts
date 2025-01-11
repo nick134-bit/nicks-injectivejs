@@ -1,12 +1,12 @@
 import { BinaryReader, BinaryWriter } from "../binary";
 import { DeepPartial } from "../helpers";
+import { GlobalDecoderRegistry } from "../registry";
 export enum ScalarType {
   SCALAR_TYPE_UNSPECIFIED = 0,
   SCALAR_TYPE_STRING = 1,
   SCALAR_TYPE_BYTES = 2,
   UNRECOGNIZED = -1,
 }
-export const ScalarTypeSDKType = ScalarType;
 export const ScalarTypeAmino = ScalarType;
 export function scalarTypeFromJSON(object: any): ScalarType {
   switch (object) {
@@ -71,24 +71,16 @@ export interface InterfaceDescriptorAmino {
    * package.name, ex. for the package a.b and interface named C, the
    * fully-qualified name will be a.b.C.
    */
-  name?: string;
+  name: string;
   /**
    * description is a human-readable description of the interface and its
    * purpose.
    */
-  description?: string;
+  description: string;
 }
 export interface InterfaceDescriptorAminoMsg {
   type: "/cosmos_proto.InterfaceDescriptor";
   value: InterfaceDescriptorAmino;
-}
-/**
- * InterfaceDescriptor describes an interface type to be used with
- * accepts_interface and implements_interface and declared by declare_interface.
- */
-export interface InterfaceDescriptorSDKType {
-  name: string;
-  description: string;
 }
 /**
  * ScalarDescriptor describes an scalar type to be used with
@@ -141,38 +133,24 @@ export interface ScalarDescriptorAmino {
    * package.name, ex. for the package a.b and scalar named C, the
    * fully-qualified name will be a.b.C.
    */
-  name?: string;
+  name: string;
   /**
    * description is a human-readable description of the scalar and its
    * encoding format. For instance a big integer or decimal scalar should
    * specify precisely the expected encoding format.
    */
-  description?: string;
+  description: string;
   /**
    * field_type is the type of field with which this scalar can be used.
    * Scalars can be used with one and only one type of field so that
    * encoding standards and simple and clear. Currently only string and
    * bytes fields are supported for scalars.
    */
-  field_type?: ScalarType[];
+  field_type: ScalarType[];
 }
 export interface ScalarDescriptorAminoMsg {
   type: "/cosmos_proto.ScalarDescriptor";
   value: ScalarDescriptorAmino;
-}
-/**
- * ScalarDescriptor describes an scalar type to be used with
- * the scalar field option and declared by declare_scalar.
- * Scalars extend simple protobuf built-in types with additional
- * syntax and semantics, for instance to represent big integers.
- * Scalars should ideally define an encoding such that there is only one
- * valid syntactical representation for a given semantic meaning,
- * i.e. the encoding should be deterministic.
- */
-export interface ScalarDescriptorSDKType {
-  name: string;
-  description: string;
-  field_type: ScalarType[];
 }
 function createBaseInterfaceDescriptor(): InterfaceDescriptor {
   return {
@@ -182,6 +160,12 @@ function createBaseInterfaceDescriptor(): InterfaceDescriptor {
 }
 export const InterfaceDescriptor = {
   typeUrl: "/cosmos_proto.InterfaceDescriptor",
+  is(o: any): o is InterfaceDescriptor {
+    return o && (o.$typeUrl === InterfaceDescriptor.typeUrl || typeof o.name === "string" && typeof o.description === "string");
+  },
+  isAmino(o: any): o is InterfaceDescriptorAmino {
+    return o && (o.$typeUrl === InterfaceDescriptor.typeUrl || typeof o.name === "string" && typeof o.description === "string");
+  },
   encode(message: InterfaceDescriptor, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.name !== "") {
       writer.uint32(10).string(message.name);
@@ -249,6 +233,7 @@ export const InterfaceDescriptor = {
     };
   }
 };
+GlobalDecoderRegistry.register(InterfaceDescriptor.typeUrl, InterfaceDescriptor);
 function createBaseScalarDescriptor(): ScalarDescriptor {
   return {
     name: "",
@@ -258,6 +243,12 @@ function createBaseScalarDescriptor(): ScalarDescriptor {
 }
 export const ScalarDescriptor = {
   typeUrl: "/cosmos_proto.ScalarDescriptor",
+  is(o: any): o is ScalarDescriptor {
+    return o && (o.$typeUrl === ScalarDescriptor.typeUrl || typeof o.name === "string" && typeof o.description === "string" && Array.isArray(o.fieldType));
+  },
+  isAmino(o: any): o is ScalarDescriptorAmino {
+    return o && (o.$typeUrl === ScalarDescriptor.typeUrl || typeof o.name === "string" && typeof o.description === "string" && Array.isArray(o.field_type));
+  },
   encode(message: ScalarDescriptor, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.name !== "") {
       writer.uint32(10).string(message.name);
@@ -289,10 +280,10 @@ export const ScalarDescriptor = {
           if ((tag & 7) === 2) {
             const end2 = reader.uint32() + reader.pos;
             while (reader.pos < end2) {
-              message.fieldType.push((reader.int32() as any));
+              message.fieldType.push(reader.int32() as any);
             }
           } else {
-            message.fieldType.push((reader.int32() as any));
+            message.fieldType.push(reader.int32() as any);
           }
           break;
         default:
@@ -347,3 +338,4 @@ export const ScalarDescriptor = {
     };
   }
 };
+GlobalDecoderRegistry.register(ScalarDescriptor.typeUrl, ScalarDescriptor);

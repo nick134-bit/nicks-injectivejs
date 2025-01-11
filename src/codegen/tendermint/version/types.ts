@@ -1,5 +1,6 @@
 import { BinaryReader, BinaryWriter } from "../../binary";
 import { DeepPartial } from "../../helpers";
+import { GlobalDecoderRegistry } from "../../registry";
 /**
  * App includes the protocol and software version for the application.
  * This information is included in ResponseInfo. The App.Protocol can be
@@ -19,21 +20,12 @@ export interface AppProtoMsg {
  * updated in ResponseEndBlock.
  */
 export interface AppAmino {
-  protocol?: string;
-  software?: string;
+  protocol: string;
+  software: string;
 }
 export interface AppAminoMsg {
   type: "/tendermint.version.App";
   value: AppAmino;
-}
-/**
- * App includes the protocol and software version for the application.
- * This information is included in ResponseInfo. The App.Protocol can be
- * updated in ResponseEndBlock.
- */
-export interface AppSDKType {
-  protocol: bigint;
-  software: string;
 }
 /**
  * Consensus captures the consensus rules for processing a block in the blockchain,
@@ -54,21 +46,12 @@ export interface ConsensusProtoMsg {
  * state transition machine.
  */
 export interface ConsensusAmino {
-  block?: string;
-  app?: string;
+  block: string;
+  app: string;
 }
 export interface ConsensusAminoMsg {
   type: "/tendermint.version.Consensus";
   value: ConsensusAmino;
-}
-/**
- * Consensus captures the consensus rules for processing a block in the blockchain,
- * including all blockchain data structures and the rules of the application's
- * state transition machine.
- */
-export interface ConsensusSDKType {
-  block: bigint;
-  app: bigint;
 }
 function createBaseApp(): App {
   return {
@@ -78,6 +61,12 @@ function createBaseApp(): App {
 }
 export const App = {
   typeUrl: "/tendermint.version.App",
+  is(o: any): o is App {
+    return o && (o.$typeUrl === App.typeUrl || typeof o.protocol === "bigint" && typeof o.software === "string");
+  },
+  isAmino(o: any): o is AppAmino {
+    return o && (o.$typeUrl === App.typeUrl || typeof o.protocol === "bigint" && typeof o.software === "string");
+  },
   encode(message: App, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.protocol !== BigInt(0)) {
       writer.uint32(8).uint64(message.protocol);
@@ -145,6 +134,7 @@ export const App = {
     };
   }
 };
+GlobalDecoderRegistry.register(App.typeUrl, App);
 function createBaseConsensus(): Consensus {
   return {
     block: BigInt(0),
@@ -153,6 +143,12 @@ function createBaseConsensus(): Consensus {
 }
 export const Consensus = {
   typeUrl: "/tendermint.version.Consensus",
+  is(o: any): o is Consensus {
+    return o && (o.$typeUrl === Consensus.typeUrl || typeof o.block === "bigint" && typeof o.app === "bigint");
+  },
+  isAmino(o: any): o is ConsensusAmino {
+    return o && (o.$typeUrl === Consensus.typeUrl || typeof o.block === "bigint" && typeof o.app === "bigint");
+  },
   encode(message: Consensus, writer: BinaryWriter = BinaryWriter.create()): BinaryWriter {
     if (message.block !== BigInt(0)) {
       writer.uint32(8).uint64(message.block);
@@ -220,3 +216,4 @@ export const Consensus = {
     };
   }
 };
+GlobalDecoderRegistry.register(Consensus.typeUrl, Consensus);

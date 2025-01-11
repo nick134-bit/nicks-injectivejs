@@ -1,12 +1,6 @@
-//@ts-nocheck
-import { GeneratedType, Registry } from "@cosmjs/proto-signing";
-import { MsgConnectionOpenInit, MsgConnectionOpenTry, MsgConnectionOpenAck, MsgConnectionOpenConfirm } from "./tx";
-export const registry: ReadonlyArray<[string, GeneratedType]> = [["/ibc.core.connection.v1.MsgConnectionOpenInit", MsgConnectionOpenInit], ["/ibc.core.connection.v1.MsgConnectionOpenTry", MsgConnectionOpenTry], ["/ibc.core.connection.v1.MsgConnectionOpenAck", MsgConnectionOpenAck], ["/ibc.core.connection.v1.MsgConnectionOpenConfirm", MsgConnectionOpenConfirm]];
-export const load = (protoRegistry: Registry) => {
-  registry.forEach(([typeUrl, mod]) => {
-    protoRegistry.register(typeUrl, mod);
-  });
-};
+import { TelescopeGeneratedType } from "../../../../types";
+import { MsgConnectionOpenInit, MsgConnectionOpenTry, MsgConnectionOpenAck, MsgConnectionOpenConfirm, MsgUpdateParams } from "./tx";
+export const registry: ReadonlyArray<[string, TelescopeGeneratedType<any, any, any>]> = [["/ibc.core.connection.v1.MsgConnectionOpenInit", MsgConnectionOpenInit], ["/ibc.core.connection.v1.MsgConnectionOpenTry", MsgConnectionOpenTry], ["/ibc.core.connection.v1.MsgConnectionOpenAck", MsgConnectionOpenAck], ["/ibc.core.connection.v1.MsgConnectionOpenConfirm", MsgConnectionOpenConfirm], ["/ibc.core.connection.v1.MsgUpdateParams", MsgUpdateParams]];
 export const MessageComposer = {
   encoded: {
     connectionOpenInit(value: MsgConnectionOpenInit) {
@@ -31,6 +25,12 @@ export const MessageComposer = {
       return {
         typeUrl: "/ibc.core.connection.v1.MsgConnectionOpenConfirm",
         value: MsgConnectionOpenConfirm.encode(value).finish()
+      };
+    },
+    updateConnectionParams(value: MsgUpdateParams) {
+      return {
+        typeUrl: "/ibc.core.connection.v1.MsgUpdateParams",
+        value: MsgUpdateParams.encode(value).finish()
       };
     }
   },
@@ -58,6 +58,12 @@ export const MessageComposer = {
         typeUrl: "/ibc.core.connection.v1.MsgConnectionOpenConfirm",
         value
       };
+    },
+    updateConnectionParams(value: MsgUpdateParams) {
+      return {
+        typeUrl: "/ibc.core.connection.v1.MsgUpdateParams",
+        value
+      };
     }
   },
   fromPartial: {
@@ -83,6 +89,12 @@ export const MessageComposer = {
       return {
         typeUrl: "/ibc.core.connection.v1.MsgConnectionOpenConfirm",
         value: MsgConnectionOpenConfirm.fromPartial(value)
+      };
+    },
+    updateConnectionParams(value: MsgUpdateParams) {
+      return {
+        typeUrl: "/ibc.core.connection.v1.MsgUpdateParams",
+        value: MsgUpdateParams.fromPartial(value)
       };
     }
   }
